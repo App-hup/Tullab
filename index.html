@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - نظام إدارة الطلاب</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#2180c0,#1a6599);
+      padding:20px;
+    }
+    .card{
+      background:#fff;
+      border-radius:18px;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+      max-width:420px;
+      width:100%;
+      padding:32px 28px;
+      text-align:center;
+    }
+    .title{
+      font-size:22px;
+      margin-bottom:6px;
+      color:#111827;
+      font-weight:700;
+    }
+    .subtitle{
+      font-size:13px;
+      color:#6b7280;
+      margin-bottom:26px;
+    }
+    .form-group{margin-bottom:18px;text-align:right}
+    label{
+      display:block;
+      font-size:13px;
+      color:#374151;
+      margin-bottom:6px;
+      font-weight:600;
+    }
+    .form-control{
+      width:100%;
+      padding:11px 12px;
+      border-radius:10px;
+      border:1px solid #d1d5db;
+      font-size:14px;
+    }
+    .form-control:focus{
+      outline:none;
+      border-color:#2180c0;
+      box-shadow:0 0 0 2px rgba(33,128,192,.15);
+    }
+    .btn{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:#2180c0;
+      color:#fff;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+      margin-top:4px;
+    }
+    .btn:hover{background:#1a6599}
+    .note{
+      margin-top:18px;
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.6;
+      text-align:right;
+    }
+    .hint-user{
+      margin-top:10px;
+      font-size:12px;
+      text-align:right;
+      color:#4b5563;
+      background:#f3f4f6;
+      border-radius:10px;
+      padding:10px 12px;
+    }
+    .hint-user code{background:#e5e7eb;padding:1px 4px;border-radius:4px}
+    .error{
+      display:none;
+      margin-bottom:14px;
+      font-size:12px;
+      color:#b91c1c;
+      text-align:right;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div style="font-size:40px;margin-bottom:10px">🎓</div>
+    <div class="title">نظام إدارة الطلاب</div>
+    <div class="subtitle">تسجيل الدخول للمدير أو المعلم</div>
+
+    <div id="errorBox" class="error"></div>
+
+    <div class="form-group">
+      <label for="username">اسم المستخدم</label>
+      <input id="username" class="form-control" type="text" placeholder="admin أو teacher">
+    </div>
+
+    <div class="form-group">
+      <label for="password">كلمة المرور</label>
+      <input id="password" class="form-control" type="password" placeholder="أدخل كلمة المرور">
+    </div>
+
+    <button class="btn" onclick="login()">تسجيل الدخول</button>
+
+    <div class="hint-user">
+      حسابات تجريبية:<br>
+      مدير: <code>admin</code> / <code>admin123</code><br>
+      معلم: <code>teacher</code> / <code>teacher123</code>
+    </div>
+
+    <div class="note">
+      عند تسجيل الدخول بنجاح سيتم نقلك تلقائياً إلى لوحة التحكم
+    </div>
+  </div>
+
+  <script type="module">
+    // يمكن لاحقاً ربط هذا الجزء بـ Firebase إن رغبت
+    function loginLocal(username, password){
+      if (username === 'admin' && password === 'admin123') {
+        return {
+          role: 'principal',
+          schoolId: 'SCH-001',
+          teacherId: null
+        };
+      }
+      if (username === 'teacher' && password === 'teacher123') {
+        return {
+          role: 'teacher',
+          schoolId: 'SCH-001',
+          teacherId: 'TCH-001'
+        };
+      }
+      return null;
+    }
+
+    window.login = function () {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      const errorBox = document.getElementById('errorBox');
+
+      if (!u || !p) {
+        errorBox.textContent = 'الرجاء إدخال اسم المستخدم وكلمة المرور';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      const user = loginLocal(u, p);
+      if (!user) {
+        errorBox.textContent = 'بيانات الدخول غير صحيحة';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      window.location.href = 'dashboard.html';
+    };
+  </script>
+</body>
+</html>
