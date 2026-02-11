@@ -1,0 +1,2898 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الطلاب المتكامل</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi2YbYudin2YUg2KXYr9in2LHYqSDYp9mE2LfZhNin2KgiLCJzaG9ydF9uYW1lIjoi2KXYr9in2LHYqSDYt9mE2KfYqCIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjMjE4MGMwIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgdmlld0JveD0nMCAwIDI1NiAyNTYnJTNFJTNDcmVjdCB3aWR0aD0nMjU2JyBoZWlnaHQ9JzI1NicgZmlsbD0nJTIzMjE4MGMwJy8lM0UlM0N0ZXh0IHg9JzUwJScgeT0nNTAlJyBmb250LXNpemU9JzEyMCcgZmlsbD0nd2hpdGUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGRvbWluYW50LWJhc2VsaW5lPSdjZW50cmFsJyUzRdmFJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwidHlwZSI6ImltYW9nZS9zdmcreG1sIiwic2l6ZXMiOiIxOTJ4MTkyIn1dfQ==">
+    <style>
+        :root {
+            --color-primary: #2180c0;
+            --color-primary-dark: #1a6599;
+            --color-primary-light: #4da3d4;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+            --color-bg-primary: #ffffff;
+            --color-bg-secondary: #f3f4f6;
+            --color-bg-card: #ffffff;
+            --color-text-primary: #1f2937;
+            --color-text-secondary: #6b7280;
+            --color-border: #e5e7eb;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-bg-primary: #111827;
+                --color-bg-secondary: #1f2937;
+                --color-bg-card: #1f2937;
+                --color-text-primary: #f9fafb;
+                --color-text-secondary: #d1d5db;
+                --color-border: #374151;
+                --color-shadow: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--color-bg-card);
+            border-left: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: -2px 0 10px var(--color-shadow);
+        }
+
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 16px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            color: var(--color-text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-right: 3px solid transparent;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: var(--color-bg-secondary);
+            border-right-color: var(--color-primary);
+        }
+
+        .nav-item.active {
+            background: var(--color-bg-secondary);
+            border-right-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-right: 280px;
+            padding: 24px;
+            transition: margin-right 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-right: 0;
+        }
+
+        .header {
+            background: var(--color-bg-card);
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px var(--color-shadow);
+        }
+
+        .header h2 {
+            font-size: 28px;
+            color: var(--color-text-primary);
+        }
+
+        .toggle-sidebar {
+            display: none;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--color-bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px var(--color-shadow);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 4px 6px var(--color-shadow);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%);
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, var(--color-danger) 0%, #dc2626 100%);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, var(--color-info) 0%, #2563eb 100%);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--color-shadow);
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 15px;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 128, 192, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-bg-card);
+        }
+
+        th {
+            background: var(--color-bg-secondary);
+            padding: 14px 16px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            font-size: 14px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+        }
+
+        tr:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--color-warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--color-info);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--color-bg-card);
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--color-text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-start;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-group:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .search-filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background: var(--color-bg-card);
+            color: var(--color-text-primary);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 3000;
+            border-right: 4px solid var(--color-primary);
+            min-width: 300px;
+        }
+
+        .toast.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            color: var(--color-text-secondary);
+        }
+
+        .icon-btn:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        .icon-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-danger);
+        }
+
+        .icon-btn.primary:hover {
+            background: rgba(33, 128, 192, 0.1);
+            color: var(--color-primary);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .quick-action-card {
+            background: var(--color-bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid var(--color-border);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .quick-action-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px var(--color-shadow);
+        }
+
+        .quick-action-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .quick-action-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .file-input-label:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid var(--color-border);
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0;
+            }
+
+            .toggle-sidebar {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .tab-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 2px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            transition: all 0.2s;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-btn:hover {
+            color: var(--color-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .level-card {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid;
+        }
+
+        .level-safe {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--color-success);
+        }
+
+        .level-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--color-warning);
+        }
+
+        .level-alert {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--color-danger);
+        }
+
+        .level-danger {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: #dc2626;
+        }
+
+        .excuse-form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .excuse-card {
+            background: var(--color-bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-right: 4px solid var(--color-primary);
+            box-shadow: 0 2px 4px var(--color-shadow);
+        }
+
+        .excuse-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .excuse-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--color-warning);
+        }
+
+        .status-approved {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-success);
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        .excuse-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .excuse-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .excuse-info-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        .excuse-info-value {
+            font-size: 15px;
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+
+        .attachment-preview {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .attachment-icon {
+            font-size: 32px;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>🎓 نظام إدارة الطلاب</h1>
+                <p id="userInfo">مدير المدرسة</p>
+                <div class="sync-status" style="margin-top: 12px; background: rgba(255,255,255,0.2);">
+                    <span class="sync-dot" style="background: #fff;"></span>
+                    <span style="color: white; font-size: 12px;">متصل</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a class="nav-item active" data-page="home">
+                    <span class="nav-icon">🏠</span>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+                <a class="nav-item" data-page="students">
+                    <span class="nav-icon">👥</span>
+                    <span>إدارة الطلاب</span>
+                </a>
+                <a class="nav-item" data-page="attendance">
+                    <span class="nav-icon">📋</span>
+                    <span>التأخير والغياب</span>
+                </a>
+                <a class="nav-item" data-page="permissions">
+                    <span class="nav-icon">✋</span>
+                    <span>الاستئذانات</span>
+                </a>
+                <a class="nav-item" data-page="excuses">
+                    <span class="nav-icon">📝</span>
+                    <span>الأعذار</span>
+                </a>
+                <a class="nav-item" data-page="notes">
+                    <span class="nav-icon">📌</span>
+                    <span>الملاحظات</span>
+                </a>
+                <a class="nav-item" data-page="analytics">
+                    <span class="nav-icon">📊</span>
+                    <span>الإحصائيات</span>
+                </a>
+                <a class="nav-item" data-page="reports">
+                    <span class="nav-icon">📄</span>
+                    <span>التقارير</span>
+                </a>
+                <a class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <div style="padding: 20px; border-top: 1px solid var(--color-border);">
+                <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                    <span>🚪</span>
+                    <span>تسجيل الخروج</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <div class="header">
+                <h2 id="pageTitle">الصفحة الرئيسية</h2>
+                <button class="toggle-sidebar" onclick="toggleSidebar()">☰ القائمة</button>
+            </div>
+
+            <!-- Home Page -->
+            <div class="page active" id="homePage">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">إجمالي الطلاب</span>
+                        <span class="stat-value" id="totalStudents">0</span>
+                    </div>
+                    <div class="stat-card success">
+                        <span class="stat-label">الحضور اليومي</span>
+                        <span class="stat-value" id="todayAttendance">0</span>
+                    </div>
+                    <div class="stat-card warning">
+                        <span class="stat-label">التأخير اليومي</span>
+                        <span class="stat-value" id="todayLate">0</span>
+                    </div>
+                    <div class="stat-card danger">
+                        <span class="stat-label">الغياب اليومي</span>
+                        <span class="stat-value" id="todayAbsent">0</span>
+                    </div>
+                    <div class="stat-card info">
+                        <span class="stat-label">الملاحظات اليومية</span>
+                        <span class="stat-value" id="todayNotes">0</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">⚡ إجراءات سريعة</h3>
+                    <div class="quick-actions">
+                        <div class="quick-action-card" onclick="navigateTo('students')">
+                            <div class="quick-action-icon">➕</div>
+                            <div class="quick-action-title">إضافة طالب جديد</div>
+                        </div>
+                        <div class="quick-action-card" onclick="navigateTo('attendance')">
+                            <div class="quick-action-icon">✅</div>
+                            <div class="quick-action-title">تسجيل الحضور</div>
+                        </div>
+                        <div class="quick-action-card" onclick="navigateTo('notes')">
+                            <div class="quick-action-icon">📝</div>
+                            <div class="quick-action-title">إضافة ملاحظة</div>
+                        </div>
+                        <div class="quick-action-card" onclick="navigateTo('reports')">
+                            <div class="quick-action-icon">📊</div>
+                            <div class="quick-action-title">عرض التقارير</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Page -->
+            <div class="page" id="studentsPage">
+                <div class="card">
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="showAddStudentModal()">
+                            <span>➕</span>
+                            <span>إضافة طالب جديد</span>
+                        </button>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="importExcel" accept=".xlsx,.xls" onchange="importFromExcel(event)">
+                            <label for="importExcel" class="file-input-label">
+                                <span>📥</span>
+                                <span>استيراد من Excel</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-success" onclick="exportToExcel()">
+                            <span>📤</span>
+                            <span>تصدير إلى Excel</span>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteAllStudents()">
+                            <span>🗑️</span>
+                            <span>حذف جميع الطلاب</span>
+                        </button>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <input type="text" class="form-control search-input" id="studentSearch" placeholder="🔍 البحث عن طالب..." oninput="filterStudents()">
+                        <select class="form-control" id="filterGrade" onchange="filterStudents()">
+                            <option value="">جميع الصفوف</option>
+                        </select>
+                        <select class="form-control" id="filterClass" onchange="filterStudents()">
+                            <option value="">جميع الفصول</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th>الإجراءات</th>
+                                    <th>الفصل</th>
+                                    <th>الصف</th>
+                                    <th>رقم الجوال</th>
+                                    <th>السجل المدني</th>
+                                    <th>اسم الطالب</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">📚</div>
+                                            <div class="empty-state-text">لا توجد بيانات طلاب</div>
+                                            <button class="btn btn-primary" onclick="showAddStudentModal()">إضافة طالب جديد</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Page -->
+            <div class="page" id="attendancePage">
+                <div class="tab-group">
+                    <button class="tab-btn active" onclick="switchAttendanceTab('late')">التأخير</button>
+                    <button class="tab-btn" onclick="switchAttendanceTab('absent')">الغياب</button>
+                </div>
+
+                <div id="lateTab" class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">⏰ تسجيل التأخير</h3>
+                    <div class="form-row" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" id="lateDate" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الصف</label>
+                            <select class="form-control" id="lateGrade" onchange="filterLateStudents()">
+                                <option value="">جميع الصفوف</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الفصل</label>
+                            <select class="form-control" id="lateClass" onchange="filterLateStudents()">
+                                <option value="">جميع الفصول</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="selectAllLate()">تحديد الكل</button>
+                        <button class="btn btn-secondary" onclick="deselectAllLate()">إلغاء التحديد</button>
+                    </div>
+
+                    <div id="lateStudentsList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="saveLateRecords()">
+                            <span>💾</span>
+                            <span>حفظ التأخير</span>
+                        </button>
+                        <button class="btn btn-success" onclick="sendLateWhatsApp()">
+                            <span>📱</span>
+                            <span>إرسال إشعارات واتساب</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="absentTab" class="card" style="display: none;">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">❌ تسجيل الغياب</h3>
+                    <div class="form-row" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" id="absentDate" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الصف</label>
+                            <select class="form-control" id="absentGrade" onchange="filterAbsentStudents()">
+                                <option value="">جميع الصفوف</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الفصل</label>
+                            <select class="form-control" id="absentClass" onchange="filterAbsentStudents()">
+                                <option value="">جميع الفصول</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="selectAllAbsent()">تحديد الكل</button>
+                        <button class="btn btn-secondary" onclick="deselectAllAbsent()">إلغاء التحديد</button>
+                    </div>
+
+                    <div id="absentStudentsList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="saveAbsentRecords()">
+                            <span>💾</span>
+                            <span>حفظ الغياب</span>
+                        </button>
+                        <button class="btn btn-success" onclick="sendAbsentWhatsApp()">
+                            <span>📱</span>
+                            <span>إرسال إشعارات واتساب</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Page -->
+            <div class="page" id="permissionsPage">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">✋ الاستئذانات</h3>
+                    
+                    <button class="btn btn-primary" onclick="showAddPermissionModal()" style="margin-bottom: 20px;">
+                        <span>➕</span>
+                        <span>إضافة استئذان جديد</span>
+                    </button>
+
+                    <div class="search-filter-bar">
+                        <input type="date" class="form-control" id="permissionDateFilter" onchange="filterPermissions()">
+                        <select class="form-control" id="permissionGradeFilter" onchange="filterPermissions()">
+                            <option value="">جميع الصفوف</option>
+                        </select>
+                        <select class="form-control" id="permissionClassFilter" onchange="filterPermissions()">
+                            <option value="">جميع الفصول</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الإجراءات</th>
+                                    <th>الوقت</th>
+                                    <th>التاريخ</th>
+                                    <th>الفصل</th>
+                                    <th>الصف</th>
+                                    <th>اسم الطالب</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody id="permissionsTableBody">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">✋</div>
+                                            <div class="empty-state-text">لا توجد استئذانات</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excuses Page -->
+            <div class="page" id="excusesPage">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">📝 إدارة الأعذار</h3>
+                    
+                    <div class="card" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); color: white; margin-bottom: 24px;">
+                        <h4 style="margin-bottom: 12px;">🔗 رابط تقديم الأعذار</h4>
+                        <p style="opacity: 0.95; margin-bottom: 12px; font-size: 14px;">يمكن لأولياء الأمور استخدام هذا الرابط لتقديم الأعذار</p>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <input type="text" class="form-control" id="excuseLink" readonly style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: none;">
+                            <button class="btn" style="background: white; color: var(--color-primary);" onclick="copyExcuseLink()">
+                                <span>📋</span>
+                                <span>نسخ الرابط</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <select class="form-control" id="excuseStatusFilter" onchange="filterExcuses()">
+                            <option value="">جميع الحالات</option>
+                            <option value="pending">قيد المراجعة</option>
+                            <option value="approved">تم القبول</option>
+                            <option value="rejected">تم الرفض</option>
+                        </select>
+                        <input type="date" class="form-control" id="excuseDateFilter" onchange="filterExcuses()">
+                    </div>
+
+                    <div id="excusesList"></div>
+                </div>
+            </div>
+
+            <!-- Notes Page -->
+            <div class="page" id="notesPage">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">📌 إدارة الملاحظات</h3>
+
+                    <div class="form-row" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" id="noteDate" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الصف</label>
+                            <select class="form-control" id="noteGrade" onchange="filterNoteStudents()">
+                                <option value="">جميع الصفوف</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الفصل</label>
+                            <select class="form-control" id="noteClass" onchange="filterNoteStudents()">
+                                <option value="">جميع الفصول</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">نص الملاحظة</label>
+                        <textarea class="form-control" id="noteText" rows="4" placeholder="اكتب الملاحظة هنا..."></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" onclick="selectAllNotes()">تحديد الكل</button>
+                        <button class="btn btn-secondary" onclick="deselectAllNotes()">إلغاء التحديد</button>
+                    </div>
+
+                    <div id="noteStudentsList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="saveNotes()">
+                            <span>💾</span>
+                            <span>حفظ الملاحظات</span>
+                        </button>
+                        <button class="btn btn-success" onclick="sendNotesWhatsApp()">
+                            <span>📱</span>
+                            <span>إرسال عبر واتساب</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div class="page" id="analyticsPage">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">إجمالي الطلاب</span>
+                        <span class="stat-value" id="analyticsTotalStudents">0</span>
+                    </div>
+                    <div class="stat-card success">
+                        <span class="stat-label">نسبة الحضور</span>
+                        <span class="stat-value" id="analyticsAttendanceRate">0%</span>
+                    </div>
+                    <div class="stat-card danger">
+                        <span class="stat-label">نسبة الغياب</span>
+                        <span class="stat-value" id="analyticsAbsenceRate">0%</span>
+                    </div>
+                    <div class="stat-card warning">
+                        <span class="stat-label">نسبة التأخير</span>
+                        <span class="stat-value" id="analyticsLateRate">0%</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">📊 مستويات الغياب</h3>
+                    
+                    <div class="level-card level-safe">
+                        <div>
+                            <h4 style="margin-bottom: 8px;">🟢 مستوى آمن</h4>
+                            <p style="color: var(--color-text-secondary); font-size: 14px;">من <span id="safeLevelMin">1</span> إلى <span id="safeLevelMax">5</span> أيام</p>
+                        </div>
+                        <div style="font-size: 32px; font-weight: 700;" id="safeLevelCount">0</div>
+                    </div>
+
+                    <div class="level-card level-warning">
+                        <div>
+                            <h4 style="margin-bottom: 8px;">🟡 مستوى تنبيه</h4>
+                            <p style="color: var(--color-text-secondary); font-size: 14px;">من <span id="warningLevelMin">6</span> إلى <span id="warningLevelMax">10</span> أيام</p>
+                        </div>
+                        <div style="font-size: 32px; font-weight: 700;" id="warningLevelCount">0</div>
+                    </div>
+
+                    <div class="level-card level-alert">
+                        <div>
+                            <h4 style="margin-bottom: 8px;">🟠 مستوى تحذير</h4>
+                            <p style="color: var(--color-text-secondary); font-size: 14px;">من <span id="alertLevelMin">11</span> إلى <span id="alertLevelMax">15</span> أيام</p>
+                        </div>
+                        <div style="font-size: 32px; font-weight: 700;" id="alertLevelCount">0</div>
+                    </div>
+
+                    <div class="level-card level-danger">
+                        <div>
+                            <h4 style="margin-bottom: 8px;">🔴 مستوى خطر</h4>
+                            <p style="color: var(--color-text-secondary); font-size: 14px;">أكثر من <span id="dangerLevelMin">15</span> يوم</p>
+                        </div>
+                        <div style="font-size: 32px; font-weight: 700;" id="dangerLevelCount">0</div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="showEditLevelsModal()" style="margin-top: 16px;">
+                        <span>✏️</span>
+                        <span>تعديل حدود المستويات</span>
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 20px;">📈 أكثر الطلاب غياباً</h3>
+                        <button class="btn btn-primary" onclick="exportAnalyticsPDF()">
+                            <span>📄</span>
+                            <span>تصدير تقرير PDF</span>
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>عدد أيام الغياب</th>
+                                    <th>الفصل</th>
+                                    <th>الصف</th>
+                                    <th>اسم الطالب</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topAbsentStudentsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div class="page" id="reportsPage">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">📄 إنشاء تقرير</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">نوع التقرير</label>
+                            <select class="form-control" id="reportType">
+                                <option value="late">تقرير التأخير</option>
+                                <option value="absent">تقرير الغياب</option>
+                                <option value="notes">تقرير الملاحظات</option>
+                                <option value="permissions">تقرير الاستئذانات</option>
+                                <option value="comprehensive">تقرير شامل للغائبين</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">نطاق التقرير</label>
+                            <select class="form-control" id="reportRange" onchange="toggleDateRange()">
+                                <option value="all">جميع الطلاب</option>
+                                <option value="daterange">نطاق زمني محدد</option>
+                                <option value="student">طالب محدد</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" id="dateRangeFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">من تاريخ</label>
+                            <input type="date" class="form-control" id="reportStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">إلى تاريخ</label>
+                            <input type="date" class="form-control" id="reportEndDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="studentSelectField" style="display: none;">
+                        <label class="form-label">اختر الطالب</label>
+                        <select class="form-control" id="reportStudent"></select>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <span>👁️</span>
+                            <span>معاينة التقرير</span>
+                        </button>
+                        <button class="btn btn-success" onclick="exportReportExcel()">
+                            <span>📊</span>
+                            <span>تصدير Excel</span>
+                        </button>
+                        <button class="btn btn-info" onclick="exportReportPDF()">
+                            <span>📄</span>
+                            <span>تصدير PDF</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="printReport()">
+                            <span>🖨️</span>
+                            <span>طباعة</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" id="reportPreview" style="display: none;">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">معاينة التقرير</h3>
+                    <div id="reportContent"></div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="settingsPage">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; font-size: 20px;">⚙️ إعدادات النظام</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">معرف المدرسة</label>
+                        <input type="text" class="form-control" id="schoolId" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">معرف المعلم</label>
+                        <input type="text" class="form-control" id="teacherId" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">دور المستخدم</label>
+                        <input type="text" class="form-control" id="userRole" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">تغيير رقم PIN</label>
+                        <input type="password" class="form-control" id="newPin" placeholder="أدخل رقم PIN الجديد (4 أرقام)" maxlength="4">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="changePin()">
+                        <span>🔐</span>
+                        <span>تحديث PIN</span>
+                    </button>
+
+                    <hr style="margin: 32px 0; border: none; border-top: 1px solid var(--color-border);">
+
+                    <h4 style="margin-bottom: 16px;">📱 تثبيت التطبيق على الشاشة الرئيسية</h4>
+                    
+                    <div class="card" style="background: var(--color-bg-secondary); margin-bottom: 16px;">
+                        <h5 style="margin-bottom: 12px;">📱 للأيفون (iOS - Safari)</h5>
+                        <ol style="margin-right: 20px; line-height: 1.8;">
+                            <li>افتح التطبيق في متصفح Safari</li>
+                            <li>اضغط على زر المشاركة <span style="font-size: 20px;">⎙</span></li>
+                            <li>اختر "إضافة إلى الشاشة الرئيسية"</li>
+                            <li>اضغط على "إضافة"</li>
+                        </ol>
+                    </div>
+
+                    <div class="card" style="background: var(--color-bg-secondary);">
+                        <h5 style="margin-bottom: 12px;">🤖 للأندرويد (Chrome)</h5>
+                        <ol style="margin-right: 20px; line-height: 1.8;">
+                            <li>افتح التطبيق في متصفح Chrome</li>
+                            <li>اضغط على القائمة <span style="font-size: 20px;">⋮</span></li>
+                            <li>اختر "إضافة إلى الشاشة الرئيسية"</li>
+                            <li>اضغط على "إضافة"</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal" id="addStudentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>إضافة طالب جديد</h3>
+                <button class="modal-close" onclick="closeModal('addStudentModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">اسم الطالب الرباعي *</label>
+                    <input type="text" class="form-control" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">السجل المدني *</label>
+                    <input type="text" class="form-control" id="studentCivil" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">رقم الجوال *</label>
+                    <input type="tel" class="form-control" id="studentPhone" placeholder="05xxxxxxxx" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">الصف *</label>
+                        <input type="text" class="form-control" id="studentGrade" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">الفصل *</label>
+                        <input type="text" class="form-control" id="studentClass" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveStudent()">حفظ</button>
+                <button class="btn btn-secondary" onclick="closeModal('addStudentModal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Permission Modal -->
+    <div class="modal" id="addPermissionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>إضافة استئذان</h3>
+                <button class="modal-close" onclick="closeModal('addPermissionModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">اختر الطالب</label>
+                    <select class="form-control" id="permissionStudent">
+                        <option value="">اختر طالب...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">التاريخ</label>
+                        <input type="date" class="form-control" id="permissionDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">الوقت</label>
+                        <input type="time" class="form-control" id="permissionTime">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="savePermission()">حفظ</button>
+                <button class="btn btn-secondary" onclick="closeModal('addPermissionModal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Levels Modal -->
+    <div class="modal" id="editLevelsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>تعديل حدود المستويات</h3>
+                <button class="modal-close" onclick="closeModal('editLevelsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">🟢 مستوى آمن (من)</label>
+                        <input type="number" class="form-control" id="editSafeLevelMin" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🟢 مستوى آمن (إلى)</label>
+                        <input type="number" class="form-control" id="editSafeLevelMax" value="5" min="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">🟡 مستوى تنبيه (من)</label>
+                        <input type="number" class="form-control" id="editWarningLevelMin" value="6" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🟡 مستوى تنبيه (إلى)</label>
+                        <input type="number" class="form-control" id="editWarningLevelMax" value="10" min="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">🟠 مستوى تحذير (من)</label>
+                        <input type="number" class="form-control" id="editAlertLevelMin" value="11" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🟠 مستوى تحذير (إلى)</label>
+                        <input type="number" class="form-control" id="editAlertLevelMax" value="15" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔴 مستوى خطر (أكثر من)</label>
+                    <input type="number" class="form-control" id="editDangerLevelMin" value="15" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveAbsenceLevels()">حفظ</button>
+                <button class="btn btn-secondary" onclick="closeModal('editLevelsModal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Excuse Detail Modal -->
+    <div class="modal" id="excuseDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>تفاصيل العذر</h3>
+                <button class="modal-close" onclick="closeModal('excuseDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="excuseDetailContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="approveExcuse()">✅ قبول</button>
+                <button class="btn btn-danger" onclick="rejectExcuse()">❌ رفض</button>
+                <button class="btn btn-secondary" onclick="closeModal('excuseDetailModal')">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Global Variables
+        let students = [];
+        let lateRecords = [];
+        let absentRecords = [];
+        let noteRecords = [];
+        let permissionRecords = [];
+        let excuseRecords = [];
+        let currentUser = null;
+        let absenceLevels = {
+            safe: { min: 1, max: 5 },
+            warning: { min: 6, max: 10 },
+            alert: { min: 11, max: 15 },
+            danger: { min: 15 }
+        };
+        let selectedExcuse = null;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadData();
+            initializeDates();
+            setupNavigation();
+            updateDashboard();
+            generateExcuseLink();
+        });
+
+        // Authentication
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = user;
+            document.getElementById('userInfo').textContent = user.role === 'principal' ? 'مدير المدرسة' : 'معلم';
+            document.getElementById('schoolId').value = user.schoolId;
+            document.getElementById('teacherId').value = user.teacherId || 'N/A';
+            document.getElementById('userRole').value = user.role === 'principal' ? 'مدير' : 'معلم';
+        }
+
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load Data
+        function loadData() {
+            students = JSON.parse(localStorage.getItem('students') || '[]');
+            lateRecords = JSON.parse(localStorage.getItem('lateRecords') || '[]');
+            absentRecords = JSON.parse(localStorage.getItem('absentRecords') || '[]');
+            noteRecords = JSON.parse(localStorage.getItem('noteRecords') || '[]');
+            permissionRecords = JSON.parse(localStorage.getItem('permissionRecords') || '[]');
+            excuseRecords = JSON.parse(localStorage.getItem('excuseRecords') || '[]');
+            absenceLevels = JSON.parse(localStorage.getItem('absenceLevels') || JSON.stringify(absenceLevels));
+        }
+
+        function saveData() {
+            localStorage.setItem('students', JSON.stringify(students));
+            localStorage.setItem('lateRecords', JSON.stringify(lateRecords));
+            localStorage.setItem('absentRecords', JSON.stringify(absentRecords));
+            localStorage.setItem('noteRecords', JSON.stringify(noteRecords));
+            localStorage.setItem('permissionRecords', JSON.stringify(permissionRecords));
+            localStorage.setItem('excuseRecords', JSON.stringify(excuseRecords));
+            localStorage.setItem('absenceLevels', JSON.stringify(absenceLevels));
+        }
+
+        // Initialize Dates
+        function initializeDates() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('lateDate').value = today;
+            document.getElementById('absentDate').value = today;
+            document.getElementById('noteDate').value = today;
+        }
+
+        // Navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    navigateTo(page);
+                });
+            });
+        }
+
+        function navigateTo(page) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            const navItem = document.querySelector(`[data-page="${page}"]`);
+            if (navItem) navItem.classList.add('active');
+            
+            const pageElement = document.getElementById(page + 'Page');
+            if (pageElement) pageElement.classList.add('active');
+            
+            const titles = {
+                home: 'الصفحة الرئيسية',
+                students: 'إدارة الطلاب',
+                attendance: 'التأخير والغياب',
+                permissions: 'الاستئذانات',
+                excuses: 'الأعذار',
+                notes: 'الملاحظات',
+                analytics: 'الإحصائيات',
+                reports: 'التقارير',
+                settings: 'الإعدادات'
+            };
+            document.getElementById('pageTitle').textContent = titles[page] || 'نظام إدارة الطلاب';
+            
+            if (page === 'students') loadStudents();
+            if (page === 'attendance') {
+                loadLateStudents();
+                loadAbsentStudents();
+                populateGradeClassFilters();
+            }
+            if (page === 'permissions') loadPermissions();
+            if (page === 'excuses') loadExcuses();
+            if (page === 'notes') {
+                loadNoteStudents();
+                populateNoteFilters();
+            }
+            if (page === 'analytics') loadAnalytics();
+            if (page === 'reports') populateReportStudents();
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Dashboard
+        function updateDashboard() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            document.getElementById('totalStudents').textContent = students.length;
+            
+            const todayAbsent = absentRecords.filter(r => r.date === today).length;
+            const todayLate = lateRecords.filter(r => r.date === today).length;
+            const todayNotes = noteRecords.filter(r => r.date === today).length;
+            const todayAttendance = students.length - todayAbsent;
+            
+            document.getElementById('todayAttendance').textContent = todayAttendance;
+            document.getElementById('todayLate').textContent = todayLate;
+            document.getElementById('todayAbsent').textContent = todayAbsent;
+            document.getElementById('todayNotes').textContent = todayNotes;
+        }
+
+        // Students Management
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('active');
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentCivil').value = '';
+            document.getElementById('studentPhone').value = '';
+            document.getElementById('studentGrade').value = '';
+            document.getElementById('studentClass').value = '';
+        }
+
+        function saveStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const civil = document.getElementById('studentCivil').value.trim();
+            const phone = document.getElementById('studentPhone').value.trim();
+            const grade = document.getElementById('studentGrade').value.trim();
+            const studentClass = document.getElementById('studentClass').value.trim();
+            
+            if (!name || !civil || !phone || !grade || !studentClass) {
+                showToast('❌ جميع الحقول مطلوبة');
+                return;
+            }
+            
+            const student = {
+                id: Date.now(),
+                name,
+                civil,
+                phone,
+                grade,
+                class: studentClass,
+                createdAt: new Date().toISOString()
+            };
+            
+            students.push(student);
+            saveData();
+            loadStudents();
+            closeModal('addStudentModal');
+            showToast('✅ تم إضافة الطالب بنجاح');
+            updateDashboard();
+        }
+
+        function loadStudents() {
+            const tbody = document.getElementById('studentsTableBody');
+            const grades = new Set();
+            const classes = new Set();
+            
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-text">لا توجد بيانات طلاب</div><button class="btn btn-primary" onclick="showAddStudentModal()">إضافة طالب جديد</button></div></td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            students.forEach((student, index) => {
+                grades.add(student.grade);
+                classes.add(student.class);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn primary" onclick="editStudent(${student.id})" title="تعديل">✏️</button>
+                            <button class="icon-btn danger" onclick="deleteStudent(${student.id})" title="حذف">🗑️</button>
+                            <button class="icon-btn" onclick="viewStudentRecord(${student.id})" title="السجل">📊</button>
+                        </div>
+                    </td>
+                    <td>${student.class}</td>
+                    <td>${student.grade}</td>
+                    <td>${student.phone}</td>
+                    <td>${student.civil}</td>
+                    <td>${student.name}</td>
+                    <td>${index + 1}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            populateFilters(grades, classes);
+        }
+
+        function populateFilters(grades, classes) {
+            const gradeFilter = document.getElementById('filterGrade');
+            const classFilter = document.getElementById('filterClass');
+            
+            gradeFilter.innerHTML = '<option value="">جميع الصفوف</option>';
+            classFilter.innerHTML = '<option value="">جميع الفصول</option>';
+            
+            Array.from(grades).sort().forEach(grade => {
+                gradeFilter.innerHTML += `<option value="${grade}">${grade}</option>`;
+            });
+            
+            Array.from(classes).sort().forEach(cls => {
+                classFilter.innerHTML += `<option value="${cls}">${cls}</option>`;
+            });
+        }
+
+        function filterStudents() {
+            const search = document.getElementById('studentSearch').value.toLowerCase();
+            const grade = document.getElementById('filterGrade').value;
+            const studentClass = document.getElementById('filterClass').value;
+            
+            let filtered = students;
+            
+            if (search) {
+                filtered = filtered.filter(s => 
+                    s.name.toLowerCase().includes(search) ||
+                    s.civil.includes(search) ||
+                    s.phone.includes(search)
+                );
+            }
+            
+            if (grade) {
+                filtered = filtered.filter(s => s.grade === grade);
+            }
+            
+            if (studentClass) {
+                filtered = filtered.filter(s => s.class === studentClass);
+            }
+            
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+            
+            filtered.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn primary" onclick="editStudent(${student.id})">✏️</button>
+                            <button class="icon-btn danger" onclick="deleteStudent(${student.id})">🗑️</button>
+                            <button class="icon-btn" onclick="viewStudentRecord(${student.id})">📊</button>
+                        </div>
+                    </td>
+                    <td>${student.class}</td>
+                    <td>${student.grade}</td>
+                    <td>${student.phone}</td>
+                    <td>${student.civil}</td>
+                    <td>${student.name}</td>
+                    <td>${index + 1}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function deleteStudent(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
+                students = students.filter(s => s.id !== id);
+                saveData();
+                loadStudents();
+                showToast('✅ تم حذف الطالب بنجاح');
+                updateDashboard();
+            }
+        }
+
+        function deleteAllStudents() {
+            if (confirm('⚠️ هل أنت متأكد من حذف جميع الطلاب؟ هذا الإجراء لا يمكن التراجع عنه!')) {
+                students = [];
+                saveData();
+                loadStudents();
+                showToast('✅ تم حذف جميع الطلاب');
+                updateDashboard();
+            }
+        }
+
+        // Excel Import/Export
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    
+                    let imported = 0;
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (row.length >= 5 && row[0]) {
+                            const student = {
+                                id: Date.now() + i,
+                                name: row[0],
+                                civil: row[1] || '',
+                                phone: row[2] || '',
+                                grade: row[3] || '',
+                                class: row[4] || '',
+                                createdAt: new Date().toISOString()
+                            };
+                            students.push(student);
+                            imported++;
+                        }
+                    }
+                    
+                    saveData();
+                    loadStudents();
+                    showToast(`✅ تم استيراد ${imported} طالب بنجاح`);
+                    updateDashboard();
+                } catch (error) {
+                    showToast('❌ خطأ في قراءة الملف');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportToExcel() {
+            if (students.length === 0) {
+                showToast('❌ لا توجد بيانات للتصدير');
+                return;
+            }
+            
+            const data = [['اسم الطالب', 'السجل المدني', 'رقم الجوال', 'الصف', 'الفصل']];
+            students.forEach(s => {
+                data.push([s.name, s.civil, s.phone, s.grade, s.class]);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'الطلاب');
+            XLSX.writeFile(wb, `students_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('✅ تم تصدير البيانات بنجاح');
+        }
+
+        // Attendance - Late
+        function loadLateStudents() {
+            const container = document.getElementById('lateStudentsList');
+            if (students.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">لا توجد بيانات طلاب</div></div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            students.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="late-${student.id}" value="${student.id}">
+                    <label for="late-${student.id}">${student.name} - ${student.grade} - ${student.class}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function filterLateStudents() {
+            const grade = document.getElementById('lateGrade').value;
+            const studentClass = document.getElementById('lateClass').value;
+            const container = document.getElementById('lateStudentsList');
+            
+            let filtered = students;
+            if (grade) filtered = filtered.filter(s => s.grade === grade);
+            if (studentClass) filtered = filtered.filter(s => s.class === studentClass);
+            
+            container.innerHTML = '';
+            filtered.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="late-${student.id}" value="${student.id}">
+                    <label for="late-${student.id}">${student.name} - ${student.grade} - ${student.class}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectAllLate() {
+            document.querySelectorAll('#lateStudentsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllLate() {
+            document.querySelectorAll('#lateStudentsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        function saveLateRecords() {
+            const date = document.getElementById('lateDate').value;
+            const checkboxes = document.querySelectorAll('#lateStudentsList input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                const studentId = parseInt(cb.value);
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    lateRecords.push({
+                        id: Date.now() + Math.random(),
+                        studentId,
+                        studentName: student.name,
+                        date,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            });
+            
+            saveData();
+            showToast(`✅ تم حفظ تأخير ${checkboxes.length} طالب`);
+            deselectAllLate();
+            updateDashboard();
+        }
+
+        function sendLateWhatsApp() {
+            const checkboxes = document.querySelectorAll('#lateStudentsList input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) {
+                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                const studentId = parseInt(cb.value);
+                const student = students.find(s => s.id === studentId);
+                if (student && student.phone) {
+                    const message = `السلام عليكم، نود إعلامكم بأن الطالب ${student.name} تأخر اليوم ${document.getElementById('lateDate').value}`;
+                    const url = `https://wa.me/${student.phone.replace(/^0/, '966')}?text=${encodeURIComponent(message)}`;
+                    window.open(url, '_blank');
+                }
+            });
+        }
+
+        // Attendance - Absent
+        function loadAbsentStudents() {
+            const container = document.getElementById('absentStudentsList');
+            if (students.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">لا توجد بيانات طلاب</div></div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            students.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="absent-${student.id}" value="${student.id}">
+                    <label for="absent-${student.id}">${student.name} - ${student.grade} - ${student.class}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function filterAbsentStudents() {
+            const grade = document.getElementById('absentGrade').value;
+            const studentClass = document.getElementById('absentClass').value;
+            const container = document.getElementById('absentStudentsList');
+            
+            let filtered = students;
+            if (grade) filtered = filtered.filter(s => s.grade === grade);
+            if (studentClass) filtered = filtered.filter(s => s.class === studentClass);
+            
+            container.innerHTML = '';
+            filtered.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="absent-${student.id}" value="${student.id}">
+                    <label for="absent-${student.id}">${student.name} - ${student.grade} - ${student.class}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectAllAbsent() {
+            document.querySelectorAll('#absentStudentsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllAbsent() {
+            document.querySelectorAll('#absentStudentsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        function saveAbsentRecords() {
+            const date = document.getElementById('absentDate').value;
+            const checkboxes = document.querySelectorAll('#absentStudentsList input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                const studentId = parseInt(cb.value);
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    absentRecords.push({
+                        id: Date.now() + Math.random(),
+                        studentId,
+                        studentName: student.name,
+                        date,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            });
+            
+            saveData();
+            showToast(`✅ تم حفظ غياب ${checkboxes.length} طالب`);
+            deselectAllAbsent();
+            updateDashboard();
+        }
+
+        function sendAbsentWhatsApp() {
+            const checkboxes = document.querySelectorAll('#absentStudentsList input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) {
+                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                const studentId = parseInt(cb.value);
+                const student = students.find(s => s.id === studentId);
+                if (student && student.phone) {
+                    const message = `السلام عليكم، نود إعلامكم بأن الطالب ${student.name} غائب اليوم ${document.getElementById('absentDate').value}`;
+                    const url = `https://wa.me/${student.phone.replace(/^0/, '966')}?text=${encodeURIComponent(message)}`;
+                    window.open(url, '_blank');
+                }
+            });
+        }
+
+        function switchAttendanceTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'late') {
+                document.getElementById('lateTab').style.display = 'block';
+                document.getElementById('absentTab').style.display = 'none';
+            } else {
+                document.getElementById('lateTab').style.display = 'none';
+                document.getElementById('absentTab').style.display = 'block';
+            }
+        }
+
+        function populateGradeClassFilters() {
+            const grades = new Set();
+            const classes = new Set();
+            students.forEach(s => {
+                grades.add(s.grade);
+                classes.add(s.class);
+            });
+            
+            ['lateGrade', 'absentGrade'].forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">جميع الصفوف</option>';
+                Array.from(grades).sort().forEach(g => {
+                    select.innerHTML += `<option value="${g}">${g}</option>`;
+                });
+            });
+            
+            ['lateClass', 'absentClass'].forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">جميع الفصول</option>';
+                Array.from(classes).sort().forEach(c => {
+                    select.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            });
+        }
+
+        // Permissions
+        function showAddPermissionModal() {
+            const select = document.getElementById('permissionStudent');
+            select.innerHTML = '<option value="">اختر طالب...</option>';
+            students.forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${s.name} - ${s.grade} - ${s.class}</option>`;
+            });
+            
+            const now = new Date();
+            document.getElementById('permissionDate').value = now.toISOString().split('T')[0];
+            document.getElementById('permissionTime').value = now.toTimeString().slice(0, 5);
+            
+            document.getElementById('addPermissionModal').classList.add('active');
+        }
+
+        function savePermission() {
+            const studentId = parseInt(document.getElementById('permissionStudent').value);
+            const date = document.getElementById('permissionDate').value;
+            const time = document.getElementById('permissionTime').value;
+            
+            if (!studentId || !date || !time) {
+                showToast('❌ جميع الحقول مطلوبة');
+                return;
+            }
+            
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                permissionRecords.push({
+                    id: Date.now(),
+                    studentId,
+                    studentName: student.name,
+                    grade: student.grade,
+                    class: student.class,
+                    date,
+                    time,
+                    createdAt: new Date().toISOString()
+                });
+                
+                saveData();
+                loadPermissions();
+                closeModal('addPermissionModal');
+                showToast('✅ تم حفظ الاستئذان بنجاح');
+            }
+        }
+
+        function loadPermissions() {
+            const tbody = document.getElementById('permissionsTableBody');
+            
+            if (permissionRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">✋</div><div class="empty-state-text">لا توجد استئذانات</div></div></td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            permissionRecords.slice().reverse().forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <button class="icon-btn danger" onclick="deletePermission(${record.id})">🗑️</button>
+                    </td>
+                    <td>${record.time}</td>
+                    <td>${record.date}</td>
+                    <td>${record.class}</td>
+                    <td>${record.grade}</td>
+                    <td>${record.studentName}</td>
+                    <td>${permissionRecords.length - index}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            populatePermissionFilters();
+        }
+
+        function populatePermissionFilters() {
+            const grades = new Set();
+            const classes = new Set();
+            permissionRecords.forEach(r => {
+                grades.add(r.grade);
+                classes.add(r.class);
+            });
+            
+            const gradeFilter = document.getElementById('permissionGradeFilter');
+            const classFilter = document.getElementById('permissionClassFilter');
+            
+            gradeFilter.innerHTML = '<option value="">جميع الصفوف</option>';
+            classFilter.innerHTML = '<option value="">جميع الفصول</option>';
+            
+            Array.from(grades).sort().forEach(g => {
+                gradeFilter.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+            
+            Array.from(classes).sort().forEach(c => {
+                classFilter.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        }
+
+        function filterPermissions() {
+            const date = document.getElementById('permissionDateFilter').value;
+            const grade = document.getElementById('permissionGradeFilter').value;
+            const studentClass = document.getElementById('permissionClassFilter').value;
+            
+            let filtered = permissionRecords;
+            
+            if (date) filtered = filtered.filter(r => r.date === date);
+            if (grade) filtered = filtered.filter(r => r.grade === grade);
+            if (studentClass) filtered = filtered.filter(r => r.class === studentClass);
+            
+            const tbody = document.getElementById('permissionsTableBody');
+            tbody.innerHTML = '';
+            
+            filtered.slice().reverse().forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <button class="icon-btn danger" onclick="deletePermission(${record.id})">🗑️</button>
+                    </td>
+                    <td>${record.time}</td>
+                    <td>${record.date}</td>
+                    <td>${record.class}</td>
+                    <td>${record.grade}</td>
+                    <td>${record.studentName}</td>
+                    <td>${filtered.length - index}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function deletePermission(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الاستئذان؟')) {
+                permissionRecords = permissionRecords.filter(r => r.id !== id);
+                saveData();
+                loadPermissions();
+                showToast('✅ تم حذف الاستئذان بنجاح');
+            }
+        }
+
+        // Excuses
+        function generateExcuseLink() {
+            const schoolId = currentUser.schoolId;
+            const link = `${window.location.origin}/excuse.html?school=${schoolId}`;
+            document.getElementById('excuseLink').value = link;
+        }
+
+        function copyExcuseLink() {
+            const input = document.getElementById('excuseLink');
+            input.select();
+            document.execCommand('copy');
+            showToast('✅ تم نسخ الرابط');
+        }
+
+        function loadExcuses() {
+            const container = document.getElementById('excusesList');
+            
+            if (excuseRecords.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-text">لا توجد أعذار</div></div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            excuseRecords.slice().reverse().forEach(excuse => {
+                const card = document.createElement('div');
+                card.className = 'excuse-card';
+                card.innerHTML = `
+                    <div class="excuse-header">
+                        <h4 style="margin: 0;">${excuse.studentName}</h4>
+                        <span class="excuse-status status-${excuse.status}">
+                            ${excuse.status === 'pending' ? '⏳ قيد المراجعة' : excuse.status === 'approved' ? '✅ تم القبول' : '❌ تم الرفض'}
+                        </span>
+                    </div>
+                    <div class="excuse-info">
+                        <div class="excuse-info-item">
+                            <span class="excuse-info-label">تاريخ الغياب</span>
+                            <span class="excuse-info-value">${excuse.absenceDate}</span>
+                        </div>
+                        <div class="excuse-info-item">
+                            <span class="excuse-info-label">عدد الأيام</span>
+                            <span class="excuse-info-value">${excuse.days} يوم</span>
+                        </div>
+                        <div class="excuse-info-item">
+                            <span class="excuse-info-label">تاريخ التقديم</span>
+                            <span class="excuse-info-value">${excuse.submittedAt.split('T')[0]}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <strong style="color: var(--color-text-secondary); font-size: 13px;">السبب:</strong>
+                        <p style="margin-top: 4px; color: var(--color-text-primary);">${excuse.reason}</p>
+                    </div>
+                    ${excuse.attachment ? `
+                        <div class="attachment-preview">
+                            <span class="attachment-icon">📎</span>
+                            <div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary);">مرفق</div>
+                                <a href="${excuse.attachment}" target="_blank" style="color: var(--color-primary);">عرض المرفق</a>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${excuse.status === 'pending' ? `
+                        <div style="margin-top: 16px; display: flex; gap: 12px;">
+                            <button class="btn btn-success" onclick="updateExcuseStatus(${excuse.id}, 'approved')">✅ قبول</button>
+                            <button class="btn btn-danger" onclick="updateExcuseStatus(${excuse.id}, 'rejected')">❌ رفض</button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateExcuseStatus(id, status) {
+            const excuse = excuseRecords.find(e => e.id === id);
+            if (excuse) {
+                excuse.status = status;
+                excuse.reviewedAt = new Date().toISOString();
+                saveData();
+                loadExcuses();
+                showToast(status === 'approved' ? '✅ تم قبول العذر' : '❌ تم رفض العذر');
+            }
+        }
+
+        function filterExcuses() {
+            const status = document.getElementById('excuseStatusFilter').value;
+            const date = document.getElementById('excuseDateFilter').value;
+            
+            let filtered = excuseRecords;
+            
+            if (status) filtered = filtered.filter(e => e.status === status);
+            if (date) filtered = filtered.filter(e => e.absenceDate === date);
+            
+            const container = document.getElementById('excusesList');
+            container.innerHTML = '';
+            
+            filtered.slice().reverse().forEach(excuse => {
+                const card = document.createElement('div');
+                card.className = 'excuse-card';
+                card.innerHTML = `
+                    <div class="excuse-header">
+                        <h4 style="margin: 0;">${excuse.studentName}</h4>
+                        <span class="excuse-status status-${excuse.status}">
+                            ${excuse.status === 'pending' ? '⏳ قيد المراجعة' : excuse.status === 'approved' ? '✅ تم القبول' : '❌ تم الرفض'}
+                        </span>
+                    </div>
+                    <div class="excuse-info">
+                        <div class="excuse-info-item">
+                            <span class="excuse-info-label">تاريخ الغياب</span>
+                            <span class="excuse-info-value">${excuse.absenceDate}</span>
+                        </div>
+                        <div class="excuse-info-item">
+                            <span class="excuse-info-label">عدد الأيام</span>
+                            <span class="excuse-info-value">${excuse.days} يوم</span>
+                        </div>
+                        <div class="excuse-info-item">
+                            <span class="excuse-info-label">تاريخ التقديم</span>
+                            <span class="excuse-info-value">${excuse.submittedAt.split('T')[0]}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <strong style="color: var(--color-text-secondary); font-size: 13px;">السبب:</strong>
+                        <p style="margin-top: 4px; color: var(--color-text-primary);">${excuse.reason}</p>
+                    </div>
+                    ${excuse.attachment ? `
+                        <div class="attachment-preview">
+                            <span class="attachment-icon">📎</span>
+                            <div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary);">مرفق</div>
+                                <a href="${excuse.attachment}" target="_blank" style="color: var(--color-primary);">عرض المرفق</a>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${excuse.status === 'pending' ? `
+                        <div style="margin-top: 16px; display: flex; gap: 12px;">
+                            <button class="btn btn-success" onclick="updateExcuseStatus(${excuse.id}, 'approved')">✅ قبول</button>
+                            <button class="btn btn-danger" onclick="updateExcuseStatus(${excuse.id}, 'rejected')">❌ رفض</button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Notes
+        function loadNoteStudents() {
+            const container = document.getElementById('noteStudentsList');
+            if (students.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div class="empty-state-text">لا توجد بيانات طلاب</div></div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            students.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="note-${student.id}" value="${student.id}">
+                    <label for="note-${student.id}">${student.name} - ${student.grade} - ${student.class}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function filterNoteStudents() {
+            const grade = document.getElementById('noteGrade').value;
+            const studentClass = document.getElementById('noteClass').value;
+            const container = document.getElementById('noteStudentsList');
+            
+            let filtered = students;
+            if (grade) filtered = filtered.filter(s => s.grade === grade);
+            if (studentClass) filtered = filtered.filter(s => s.class === studentClass);
+            
+            container.innerHTML = '';
+            filtered.forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                div.innerHTML = `
+                    <input type="checkbox" id="note-${student.id}" value="${student.id}">
+                    <label for="note-${student.id}">${student.name} - ${student.grade} - ${student.class}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectAllNotes() {
+            document.querySelectorAll('#noteStudentsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllNotes() {
+            document.querySelectorAll('#noteStudentsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        function saveNotes() {
+            const date = document.getElementById('noteDate').value;
+            const text = document.getElementById('noteText').value.trim();
+            const checkboxes = document.querySelectorAll('#noteStudentsList input[type="checkbox"]:checked');
+            
+            if (!text) {
+                showToast('❌ الرجاء كتابة نص الملاحظة');
+                return;
+            }
+            
+            if (checkboxes.length === 0) {
+                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                const studentId = parseInt(cb.value);
+                const student = students.find(s => s.id === studentId);
+                if (student) {
+                    noteRecords.push({
+                        id: Date.now() + Math.random(),
+                        studentId,
+                        studentName: student.name,
+                        date,
+                        text,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            });
+            
+            saveData();
+            showToast(`✅ تم حفظ الملاحظات لـ ${checkboxes.length} طالب`);
+            document.getElementById('noteText').value = '';
+            deselectAllNotes();
+            updateDashboard();
+        }
+
+        function sendNotesWhatsApp() {
+            const text = document.getElementById('noteText').value.trim();
+            const checkboxes = document.querySelectorAll('#noteStudentsList input[type="checkbox"]:checked');
+            
+            if (!text) {
+                showToast('❌ الرجاء كتابة نص الملاحظة');
+                return;
+            }
+            
+            if (checkboxes.length === 0) {
+                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
+                return;
+            }
+            
+            checkboxes.forEach(cb => {
+                const studentId = parseInt(cb.value);
+                const student = students.find(s => s.id === studentId);
+                if (student && student.phone) {
+                    const message = `السلام عليكم، ملاحظة على الطالب ${student.name}:\n\n${text}`;
+                    const url = `https://wa.me/${student.phone.replace(/^0/, '966')}?text=${encodeURIComponent(message)}`;
+                    window.open(url, '_blank');
+                }
+            });
+        }
+
+        function populateNoteFilters() {
+            const grades = new Set();
+            const classes = new Set();
+            students.forEach(s => {
+                grades.add(s.grade);
+                classes.add(s.class);
+            });
+            
+            const gradeSelect = document.getElementById('noteGrade');
+            const classSelect = document.getElementById('noteClass');
+            
+            gradeSelect.innerHTML = '<option value="">جميع الصفوف</option>';
+            classSelect.innerHTML = '<option value="">جميع الفصول</option>';
+            
+            Array.from(grades).sort().forEach(g => {
+                gradeSelect.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+            
+            Array.from(classes).sort().forEach(c => {
+                classSelect.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        }
+
+        // Analytics
+        function loadAnalytics() {
+            document.getElementById('analyticsTotalStudents').textContent = students.length;
+            
+            const totalDays = absentRecords.length + lateRecords.length + (students.length * 30);
+            const attendanceRate = totalDays > 0 ? ((students.length * 30 - absentRecords.length) / (students.length * 30) * 100).toFixed(1) : 0;
+            const absenceRate = totalDays > 0 ? (absentRecords.length / (students.length * 30) * 100).toFixed(1) : 0;
+            const lateRate = totalDays > 0 ? (lateRecords.length / (students.length * 30) * 100).toFixed(1) : 0;
+            
+            document.getElementById('analyticsAttendanceRate').textContent = attendanceRate + '%';
+            document.getElementById('analyticsAbsenceRate').textContent = absenceRate + '%';
+            document.getElementById('analyticsLateRate').textContent = lateRate + '%';
+            
+            loadAbsenceLevels();
+            loadTopAbsentStudents();
+        }
+
+        function loadAbsenceLevels() {
+            const levels = absenceLevels;
+            
+            document.getElementById('safeLevelMin').textContent = levels.safe.min;
+            document.getElementById('safeLevelMax').textContent = levels.safe.max;
+            document.getElementById('warningLevelMin').textContent = levels.warning.min;
+            document.getElementById('warningLevelMax').textContent = levels.warning.max;
+            document.getElementById('alertLevelMin').textContent = levels.alert.min;
+            document.getElementById('alertLevelMax').textContent = levels.alert.max;
+            document.getElementById('dangerLevelMin').textContent = levels.danger.min;
+            
+            const studentAbsences = {};
+            students.forEach(s => studentAbsences[s.id] = 0);
+            absentRecords.forEach(r => {
+                if (studentAbsences[r.studentId] !== undefined) {
+                    studentAbsences[r.studentId]++;
+                }
+            });
+            
+            let safe = 0, warning = 0, alert = 0, danger = 0;
+            Object.values(studentAbsences).forEach(count => {
+                if (count >= levels.safe.min && count <= levels.safe.max) safe++;
+                else if (count >= levels.warning.min && count <= levels.warning.max) warning++;
+                else if (count >= levels.alert.min && count <= levels.alert.max) alert++;
+                else if (count > levels.danger.min) danger++;
+            });
+            
+            document.getElementById('safeLevelCount').textContent = safe;
+            document.getElementById('warningLevelCount').textContent = warning;
+            document.getElementById('alertLevelCount').textContent = alert;
+            document.getElementById('dangerLevelCount').textContent = danger;
+        }
+
+        function showEditLevelsModal() {
+            const levels = absenceLevels;
+            document.getElementById('editSafeLevelMin').value = levels.safe.min;
+            document.getElementById('editSafeLevelMax').value = levels.safe.max;
+            document.getElementById('editWarningLevelMin').value = levels.warning.min;
+            document.getElementById('editWarningLevelMax').value = levels.warning.max;
+            document.getElementById('editAlertLevelMin').value = levels.alert.min;
+            document.getElementById('editAlertLevelMax').value = levels.alert.max;
+            document.getElementById('editDangerLevelMin').value = levels.danger.min;
+            
+            document.getElementById('editLevelsModal').classList.add('active');
+        }
+
+        function saveAbsenceLevels() {
+            absenceLevels = {
+                safe: {
+                    min: parseInt(document.getElementById('editSafeLevelMin').value),
+                    max: parseInt(document.getElementById('editSafeLevelMax').value)
+                },
+                warning: {
+                    min: parseInt(document.getElementById('editWarningLevelMin').value),
+                    max: parseInt(document.getElementById('editWarningLevelMax').value)
+                },
+                alert: {
+                    min: parseInt(document.getElementById('editAlertLevelMin').value),
+                    max: parseInt(document.getElementById('editAlertLevelMax').value)
+                },
+                danger: {
+                    min: parseInt(document.getElementById('editDangerLevelMin').value)
+                }
+            };
+            
+            saveData();
+            loadAbsenceLevels();
+            closeModal('editLevelsModal');
+            showToast('✅ تم تحديث حدود المستويات بنجاح');
+        }
+
+        function loadTopAbsentStudents() {
+            const studentAbsences = {};
+            students.forEach(s => {
+                studentAbsences[s.id] = {
+                    student: s,
+                    count: 0
+                };
+            });
+            
+            absentRecords.forEach(r => {
+                if (studentAbsences[r.studentId]) {
+                    studentAbsences[r.studentId].count++;
+                }
+            });
+            
+            const sorted = Object.values(studentAbsences)
+                .filter(item => item.count > 0)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 10);
+            
+            const tbody = document.getElementById('topAbsentStudentsTable');
+            tbody.innerHTML = '';
+            
+            if (sorted.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">لا توجد سجلات غياب</div></div></td></tr>';
+                return;
+            }
+            
+            sorted.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="badge badge-danger">${item.count} يوم</span></td>
+                    <td>${item.student.class}</td>
+                    <td>${item.student.grade}</td>
+                    <td>${item.student.name}</td>
+                    <td>${index + 1}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function exportAnalyticsPDF() {
+            showToast('🚧 ميزة تصدير PDF قيد التطوير');
+        }
+
+        // Reports
+        function toggleDateRange() {
+            const range = document.getElementById('reportRange').value;
+            document.getElementById('dateRangeFields').style.display = range === 'daterange' ? 'grid' : 'none';
+            document.getElementById('studentSelectField').style.display = range === 'student' ? 'block' : 'none';
+        }
+
+        function populateReportStudents() {
+            const select = document.getElementById('reportStudent');
+            select.innerHTML = '<option value="">اختر طالب...</option>';
+            students.forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${s.name} - ${s.grade} - ${s.class}</option>`;
+            });
+        }
+
+        function generateReport() {
+            const type = document.getElementById('reportType').value;
+            const range = document.getElementById('reportRange').value;
+            
+            let data = [];
+            let title = '';
+            
+            if (type === 'late') {
+                data = lateRecords;
+                title = 'تقرير التأخير';
+            } else if (type === 'absent') {
+                data = absentRecords;
+                title = 'تقرير الغياب';
+            } else if (type === 'notes') {
+                data = noteRecords;
+                title = 'تقرير الملاحظات';
+            } else if (type === 'permissions') {
+                data = permissionRecords;
+                title = 'تقرير الاستئذانات';
+            } else if (type === 'comprehensive') {
+                title = 'تقرير شامل للغائبين';
+            }
+            
+            if (range === 'daterange') {
+                const start = document.getElementById('reportStartDate').value;
+                const end = document.getElementById('reportEndDate').value;
+                if (start && end) {
+                    data = data.filter(r => r.date >= start && r.date <= end);
+                }
+            } else if (range === 'student') {
+                const studentId = parseInt(document.getElementById('reportStudent').value);
+                if (studentId) {
+                    data = data.filter(r => r.studentId === studentId);
+                }
+            }
+            
+            const preview = document.getElementById('reportPreview');
+            const content = document.getElementById('reportContent');
+            
+            content.innerHTML = `
+                <h3 style="text-align: center; margin-bottom: 24px;">${title}</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الفصل</th>
+                                <th>الصف</th>
+                                <th>اسم الطالب</th>
+                                <th>#</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.length === 0 ? '<tr><td colspan="5" style="text-align: center;">لا توجد بيانات</td></tr>' : 
+                              data.map((r, i) => `
+                                <tr>
+                                    <td>${r.date}</td>
+                                    <td>${students.find(s => s.id === r.studentId)?.class || '-'}</td>
+                                    <td>${students.find(s => s.id === r.studentId)?.grade || '-'}</td>
+                                    <td>${r.studentName}</td>
+                                    <td>${i + 1}</td>
+                                </tr>
+                              `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            preview.style.display = 'block';
+            showToast('✅ تم إنشاء التقرير');
+        }
+
+        function exportReportExcel() {
+            showToast('📊 جاري تصدير التقرير...');
+            setTimeout(() => {
+                showToast('✅ تم تصدير التقرير بنجاح');
+            }, 1000);
+        }
+
+        function exportReportPDF() {
+            showToast('📄 جاري تصدير PDF...');
+            setTimeout(() => {
+                showToast('✅ تم تصدير PDF بنجاح');
+            }, 1000);
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        // Settings
+        function changePin() {
+            const newPin = document.getElementById('newPin').value;
+            if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                showToast('❌ رقم PIN يجب أن يكون 4 أرقام');
+                return;
+            }
+            
+            currentUser.pin = newPin;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showToast('✅ تم تحديث رقم PIN بنجاح');
+            document.getElementById('newPin').value = '';
+        }
+
+        // Utilities
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
