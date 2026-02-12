@@ -103,8 +103,8 @@
     <div id="errorBox" class="error"></div>
 
     <div class="form-group">
-      <label for="username">اسم المستخدم</label>
-      <input id="username" class="form-control" type="text" placeholder="admin أو teacher">
+      <label for="username">البريد الإلكتروني</label>
+      <input id="username" class="form-control" type="email" placeholder="example@school.com">
     </div>
 
     <div class="form-group">
@@ -116,8 +116,8 @@
 
     <div class="hint-user">
       حسابات تجريبية:<br>
-      مدير: <code>admin</code> / <code>admin123</code><br>
-      معلم: <code>teacher</code> / <code>teacher123</code>
+      مدير: <code>admin@school.com</code> / <code>admin123</code><br>
+      معلم: <code>teacher@school.com</code> / <code>teacher123</code>
     </div>
 
     <div class="note">
@@ -125,46 +125,66 @@
     </div>
   </div>
 
+  <!-- Firebase SDKs -->
   <script type="module">
-    // يمكن لاحقاً ربط هذا الجزء بـ Firebase إن رغبت
-    function loginLocal(username, password){
-      if (username === 'admin' && password === 'admin123') {
-        return {
-          role: 'principal',
-          schoolId: 'SCH-001',
-          teacherId: null
-        };
-      }
-      if (username === 'teacher' && password === 'teacher123') {
-        return {
-          role: 'teacher',
-          schoolId: 'SCH-001',
-          teacherId: 'TCH-001'
-        };
-      }
-      return null;
-    }
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-    window.login = function () {
-      const u = document.getElementById('username').value.trim();
-      const p = document.getElementById('password').value.trim();
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyZRbnkefGENtIj7kYgcOnFUANn8reLgw",
+      authDomain: "management-8fdfa.firebaseapp.com",
+      databaseURL: "https://management-8fdfa-default-rtdb.firebaseio.com",
+      projectId: "management-8fdfa",
+      storageBucket: "management-8fdfa.firebasestorage.app",
+      messagingSenderId: "761622688122",
+      appId: "1:761622688122:web:8a5b2cdf5e079eeac066c3"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // مراقبة حالة تسجيل الدخول
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // جلب بيانات المستخدم من Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          localStorage.setItem('currentUser', JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            ...userData
+          }));
+          window.location.href = 'dashboard.html';
+        } else {
+          console.error('بيانات المستخدم غير موجودة في Firestore');
+        }
+      }
+    });
+
+    window.login = async function() {
+      const email = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
       const errorBox = document.getElementById('errorBox');
 
-      if (!u || !p) {
-        errorBox.textContent = 'الرجاء إدخال اسم المستخدم وكلمة المرور';
+      if (!email || !password) {
+        errorBox.textContent = 'الرجاء إدخال البريد الإلكتروني وكلمة المرور';
         errorBox.style.display = 'block';
         return;
       }
 
-      const user = loginLocal(u, p);
-      if (!user) {
-        errorBox.textContent = 'بيانات الدخول غير صحيحة';
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // سينتقل تلقائياً بفضل onAuthStateChanged
+      } catch (error) {
+        console.error('خطأ في تسجيل الدخول:', error);
+        errorBox.textContent = 'بريد إلكتروني أو كلمة مرور خاطئة';
         errorBox.style.display = 'block';
-        return;
       }
-
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      window.location.href = 'dashboard.html';
     };
   </script>
 </body>
