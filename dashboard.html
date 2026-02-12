@@ -1627,7 +1627,9 @@
   setupNavigation();    // كما هو
   await loadData();     // النسخة الجديدة
   loadStudents();       // ليُحدَّث جدول الطلاب فورًا
-});
+  generateExcuseLink(); // توليد رابط الأعذار بعد معرفة schoolId
+        });
+        
 
 
         // Authentication
@@ -2500,10 +2502,20 @@
 
         // Excuses
         function generateExcuseLink() {
-            const schoolId = currentUser.schoolId;
-            const link = `${window.location.origin}/excuse.html?school=${schoolId}`;
-            document.getElementById('excuseLink').value = link;
-        }
+  const schoolId = currentUser.schoolId;
+
+  if (!schoolId) {
+    document.getElementById('excuseLink').value = 'لم يتم تعيين رقم المدرسة';
+    return;
+  }
+
+  // يبني رابط excuse.html في نفس المجلد الذي فيه dashboard.html
+  const excuseUrl = new URL('excuse.html', window.location.href);
+  excuseUrl.searchParams.set('school', schoolId);
+
+  document.getElementById('excuseLink').value = excuseUrl.toString();
+}
+
 
         function copyExcuseLink() {
             const input = document.getElementById('excuseLink');
