@@ -4,10 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تسجيل حساب جديد - نظام الطلاب</title>
-  <!-- Firebase Compat Libraries (يعمل مباشرة بدون npm أو bundler) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <style>
+    /* نفس التصميم السابق مع تعديلات بسيطة */
     body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-    .card{background:#fff;border-radius:20px;box-shadow:0 20px 60px
+    .card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:450px;width:100%;padding:40px;text-align:center}
+    .title{font-size:28px;color:#333;margin-bottom:10px}
+    .subtitle{color:#666;margin-bottom:30px;font-size:15px}
+    .form-group{margin-bottom:25px;text-align:right}
+    label{display:block;margin-bottom:8px;font-weight:600;color:#333;font-size:14px}
+    .form-control{width:100%;padding:15px;border:2px solid #e0e0e0;border-radius:12px;font-size:16px;transition:all .3s}
+    .form-control:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+    select.form-control{background:#f8f9fa}
+    .btn{width:100%;padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .3s}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,.4)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .alert{padding:15px;border-radius:10px;margin:20px 0;display:none;font-size:14px}
+    .alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+    .alert-error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+    .alert.show{display:block}
+    .link{margin-top:20px}
+    .link a{color:#667eea;text-decoration:none;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 class="title">🎓 تسجيل حساب جديد</h1>
+    <p class="subtitle">أنشئ حسابك كمدير أو معلم</p>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label>البريد الإلكتروني <span style="color:red">*</span></label>
+        <input type="email" id="email" class="form-control" placeholder="example@school.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>كلمة المرور <span style="color:red">*</span></label>
+        <input type="password" id="password" class="form-control" placeholder="كلمة مرور قوية" required>
+      </div>
+
+      <div class="form-group">
+        <label>تأكيد كلمة المرور <span style="color:red">*</span></label>
+        <input type="password" id="confirmPassword" class="form-control" placeholder="أعد كتابة كلمة المرور" required>
+      </div>
+
+      <div class="form-group">
+        <label>نوع الحساب <span style="color:red">*</span></label>
+        <select id="role" class="form-control" required>
+          <option value="">اختر نوع الحساب</option>
+          <option value="principal">مدير مدرسة</option>
+          <option value="teacher">معلم</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>رقم المدرسة <span style="color:red">*</span></label>
+        <input type="text" id="schoolId" class="form-control" placeholder="مثال: SCH-001" required>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">إنشاء الحساب</button>
+    </form>
+
+    <div class="link">
+      <a href="index.html">لديك حساب؟ تسجيل الدخول</a>
+    </div>
+  </div>
+
+  <script>
+    // 🔥 ضع هنا firebaseConfig الخاص بك من Firebase Console
+    const firebaseConfig = {
+      // مثال:
+      // apiKey: "AIza...",
+      // authDomain: "tullab.firebaseapp.com",
+      // projectId: "tullab",
+      // ... (انسخ الكامل من Firebase Console)
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const role = document.getElementById('role').value;
+      const schoolId = document.getElementById('schoolId').value;
+      const submitBtn = document.getElementById('submitBtn');
+      const alert = document.getElementById('alert');
+
+      // التحقق من تطابق كلمات المرور
+      if (password !== confirmPassword) {
+        showAlert('كلمات المرور غير متطابقة', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showAlert('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري الإنشاء...';
+
+      try {
+        // إنشاء المستخدم
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // حفظ بيانات المستخدم في Firestore
+        await db.collection('users').doc(user.uid).set({
+          email: email,
+          role: role,
+          schoolId: schoolId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+
+      } catch (error) {
+        let message = 'خطأ غير معروف';
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            message = 'هذا البريد مستخدم بالفعل';
+            break;
+          case 'auth/weak-password':
+            message = 'كلمة المرور ضعيفة جداً';
+            break;
+          case 'auth/invalid-email':
+            message = 'البريد الإلكتروني غير صحيح';
+            break;
+        }
+        showAlert(message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'إنشاء الحساب';
+      }
+    });
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert alert-${type} show`;
+      setTimeout(() => alert.classList.remove('show'), 5000);
+    }
+  </script>
+</body>
+</html>
