@@ -1,31 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقديم عذر غياب</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>تقديم عذر الغياب</title>
     <style>
-        :root {
-            --color-primary: #4a69bd;
-            --color-primary-dark: #3c5aa6;
-            --color-secondary: #6c5ce7;
-            --color-success: #00b894;
-            --color-danger: #d63031;
-            --color-warning: #fdcb6e;
-            --color-light: #f5f6fa;
-            --color-dark: #2c3e50;
-            --color-text: #2c3e50;
-            --color-text-secondary: #7f8c8d;
-            --color-border: #dcdde1;
-            --color-background: #f8f9fa;
-            --font-family: 'Tajawal', 'Segoe UI', sans-serif;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 5px 20px rgba(0, 0, 0, 0.15);
-            --border-radius: 12px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -33,322 +13,487 @@
         }
 
         body {
-            font-family: var(--font-family);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--color-text);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
         .container {
+            max-width: 700px;
+            margin: 40px auto;
             background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-hover);
-            width: 100%;
-            max-width: 600px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo h1 {
-            color: var(--color-primary);
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .logo p {
-            color: var(--color-text-secondary);
-            font-size: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--color-text);
-        }
-
-        input[type="text"],
-        input[type="date"],
-        input[type="number"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: var(--font-family);
-            transition: var(--transition);
-            background-color: var(--color-light);
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            background-color: white;
-            box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .file-upload {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .file-upload input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-upload-label {
-            display: block;
-            padding: 12px 15px;
-            border: 2px dashed var(--color-border);
-            border-radius: 8px;
-            text-align: center;
-            color: var(--color-text-secondary);
-            transition: var(--transition);
-            background-color: var(--color-light);
-        }
-
-        .file-upload-label:hover {
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
-
-        .file-upload-label i {
-            margin-left: 8px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(74, 105, 189, 0.4);
-        }
-
-        .btn-primary:disabled {
-            background: #b2bec3;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .success-message {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 20px;
-            display: none;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .success-message i {
-            font-size: 24px;
-            margin-left: 8px;
+            animation: fadeIn 0.5s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header-icon {
+            font-size: 64px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-right: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-wrapper:hover {
+            background: #e8eaf6;
+            border-color: #764ba2;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .file-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .selected-file {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-size: 14px;
+        }
+
+        .selected-file.show {
+            display: block;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        .success-message h2 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .success-message p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .btn-new {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-new:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <h1><i class="fas fa-graduation-cap"></i> نظام الحضور</h1>
-            <p>نموذج تقديم عذر غياب</p>
+        <div class="header">
+            <div class="header-icon">📝</div>
+            <h1>تقديم عذر الغياب</h1>
+            <p>يرجى ملء النموذج أدناه لتقديم عذر الغياب</p>
         </div>
+
+        <div id="alertBox" class="alert"></div>
 
         <form id="excuseForm">
             <div class="form-group">
-                <label for="studentName">اسم الطالب الكامل</label>
-                <input type="text" id="studentName" name="studentName" required placeholder="أدخل اسم الطالب">
+                <label class="form-label">
+                    <span class="required">*</span>
+                    اسم الطالب بالكامل
+                </label>
+                <input type="text" id="studentName" class="form-control" placeholder="أدخل اسم الطالب الثلاثي" required>
             </div>
 
             <div class="form-group">
-                <label for="grade">الصف</label>
-                <select id="grade" name="grade" required>
+                <label class="form-label">
+                    <span class="required">*</span>
+                    الصف
+                </label>
+                <select id="grade" class="form-control" required>
                     <option value="">اختر الصف</option>
-                    <option value="الاول الابتدائي">الاول الابتدائي</option>
+                    <option value="الأول الابتدائي">الأول الابتدائي</option>
                     <option value="الثاني الابتدائي">الثاني الابتدائي</option>
                     <option value="الثالث الابتدائي">الثالث الابتدائي</option>
                     <option value="الرابع الابتدائي">الرابع الابتدائي</option>
                     <option value="الخامس الابتدائي">الخامس الابتدائي</option>
                     <option value="السادس الابتدائي">السادس الابتدائي</option>
+                    <option value="الأول المتوسط">الأول المتوسط</option>
+                    <option value="الثاني المتوسط">الثاني المتوسط</option>
+                    <option value="الثالث المتوسط">الثالث المتوسط</option>
+                    <option value="الأول الثانوي">الأول الثانوي</option>
+                    <option value="الثاني الثانوي">الثاني الثانوي</option>
+                    <option value="الثالث الثانوي">الثالث الثانوي</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="class">الفصل</label>
-                <select id="class" name="class" required>
-                    <option value="">اختر الفصل</option>
-                    <option value="أ">أ</option>
-                    <option value="ب">ب</option>
-                    <option value="ج">ج</option>
-                    <option value="د">د</option>
-                </select>
+                <label class="form-label">
+                    <span class="required">*</span>
+                    الفصل
+                </label>
+                <input type="text" id="className" class="form-control" placeholder="مثال: أ - ب - ج" required>
             </div>
 
             <div class="form-group">
-                <label for="absenceDate">تاريخ الغياب</label>
-                <input type="date" id="absenceDate" name="absenceDate" required>
+                <label class="form-label">
+                    <span class="required">*</span>
+                    تاريخ الغياب
+                </label>
+                <input type="date" id="absentDate" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label for="days">عدد أيام الغياب</label>
-                <input type="number" id="days" name="days" min="1" value="1" required>
+                <label class="form-label">
+                    <span class="required">*</span>
+                    سبب الغياب
+                </label>
+                <textarea id="reason" class="form-control" placeholder="اكتب سبب الغياب بالتفصيل..." required></textarea>
             </div>
 
             <div class="form-group">
-                <label for="reason">سبب الغياب</label>
-                <textarea id="reason" name="reason" required placeholder="اكتب سبب الغياب بالتفصيل"></textarea>
+                <label class="form-label">
+                    <span class="required">*</span>
+                    رقم الهاتف (ولي الأمر)
+                </label>
+                <input type="tel" id="parentPhone" class="form-control" placeholder="05XXXXXXXX" required pattern="[0-9]{10}">
             </div>
 
             <div class="form-group">
-                <label>إرفاق ملف (اختياري)</label>
-                <div class="file-upload">
-                    <input type="file" id="attachment" name="attachment" accept="image/*,.pdf">
-                    <label for="attachment" class="file-upload-label">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span id="file-name">اختر ملفاً أو اسحبه هنا</span>
-                    </label>
+                <label class="form-label">
+                    إرفاق مستند (اختياري)
+                </label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="attachment" accept="image/*,.pdf">
+                    <div class="file-icon">📎</div>
+                    <div class="file-info">
+                        <strong>اضغط لاختيار ملف</strong><br>
+                        <small>الحد الأقصى: 5 ميجابايت (صورة أو PDF)</small>
+                    </div>
                 </div>
+                <div class="selected-file" id="selectedFile"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-paper-plane"></i>
-                إرسال العذر
+            <button type="submit" class="btn-submit" id="submitBtn">
+                📤 إرسال العذر
             </button>
         </form>
 
-        <div id="successMessage" class="success-message">
-            <i class="fas fa-check-circle"></i>
-            <span>تم إرسال العذر بنجاح! سيتم مراجعته من قبل الإدارة.</span>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: #666;">جاري إرسال العذر...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✅</div>
+            <h2>تم إرسال العذر بنجاح!</h2>
+            <p>سيتم مراجعة العذر والرد عليكم قريباً</p>
+            <a href="#" class="btn-new" onclick="resetForm()">تقديم عذر جديد</a>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const schoolId = urlParams.get('school');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-            if (!schoolId) {
-                document.body.innerHTML = `
-                    <div class="container" style="text-align: center;">
-                        <h2 style="color: var(--color-danger);">خطأ في الرابط</h2>
-                        <p>الرابط الذي استخدمته غير صالح. يرجى التواصل مع المدرسة للحصول على الرابط الصحيح.</p>
-                    </div>
-                `;
-                return;
-            }
+        const firebaseConfig = {
+          apiKey: "AIzaSyCyZRbnkefGENtIj7kYgcOnFUANn8reLgw",
+          authDomain: "management-8fdfa.firebaseapp.com",
+          databaseURL: "https://management-8fdfa-default-rtdb.firebaseio.com",
+          projectId: "management-8fdfa",
+          storageBucket: "management-8fdfa.firebasestorage.app",
+          messagingSenderId: "761622688122",
+          appId: "1:761622688122:web:8a5b2cdf5e079eeac066c3"
+        };
 
-            // Set today's date as default
-            document.getElementById('absenceDate').valueAsDate = new Date();
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
 
-            // Handle file input change
-            const fileInput = document.getElementById('attachment');
-            const fileNameSpan = document.getElementById('file-name');
+        document.getElementById('attachment').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const selectedFileDiv = document.getElementById('selectedFile');
             
-            fileInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    fileNameSpan.textContent = this.files[0].name;
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                if (fileSize > 5) {
+                    showAlert('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت', 'danger');
+                    e.target.value = '';
+                    selectedFileDiv.classList.remove('show');
                 } else {
-                    fileNameSpan.textContent = 'اختر ملفاً أو اسحبه هنا';
+                    selectedFileDiv.textContent = `✅ تم اختيار: ${file.name} (${fileSize} MB)`;
+                    selectedFileDiv.classList.add('show');
                 }
-            });
+            }
+        });
 
-            // Handle form submission
-            const excuseForm = document.getElementById('excuseForm');
-            excuseForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(excuseForm);
+        document.getElementById('excuseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = document.getElementById('excuseForm');
+            const loading = document.getElementById('loading');
+            const successMessage = document.getElementById('successMessage');
+            const submitBtn = document.getElementById('submitBtn');
+
+            try {
+                submitBtn.disabled = true;
+                form.style.display = 'none';
+                loading.style.display = 'block';
+
                 const excuseData = {
-                    id: Date.now(),
-                    studentName: formData.get('studentName'),
-                    grade: formData.get('grade'),
-                    class: formData.get('class'),
-                    absenceDate: formData.get('absenceDate'),
-                    days: formData.get('days'),
-                    reason: formData.get('reason'),
-                    status: 'pending',
+                    studentName: document.getElementById('studentName').value,
+                    grade: document.getElementById('grade').value,
+                    className: document.getElementById('className').value,
+                    absentDate: document.getElementById('absentDate').value,
+                    reason: document.getElementById('reason').value,
+                    parentPhone: document.getElementById('parentPhone').value,
                     submittedAt: new Date().toISOString(),
-                    attachment: null // In a real app, you'd upload this to a server
+                    status: 'pending'
                 };
 
-                // For this demo, we'll just store the file name
-                if (fileInput.files[0]) {
-                    excuseData.attachment = fileInput.files[0].name;
+                const fileInput = document.getElementById('attachment');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const fileName = `excuses/${Date.now()}_${file.name}`;
+                    const fileRef = storageRef(storage, fileName);
+                    
+                    await uploadBytes(fileRef, file);
+                    const downloadURL = await getDownloadURL(fileRef);
+                    excuseData.attachmentURL = downloadURL;
+                    excuseData.attachmentName = file.name;
                 }
 
-                // Save to localStorage, specific to the school
-                const storageKey = `excuses_${schoolId}`;
-                let excuses = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                excuses.push(excuseData);
-                localStorage.setItem(storageKey, JSON.stringify(excuses));
+                const excusesRef = ref(database, 'excuses');
+                const newExcuseRef = push(excusesRef);
+                await set(newExcuseRef, excuseData);
 
-                // Show success message
-                document.getElementById('excuseForm').style.display = 'none';
-                document.getElementById('successMessage').style.display = 'block';
-            });
+                loading.style.display = 'none';
+                successMessage.classList.add('show');
+
+            } catch (error) {
+                loading.style.display = 'none';
+                form.style.display = 'block';
+                submitBtn.disabled = false;
+                showAlert('حدث خطأ أثناء إرسال العذر: ' + error.message, 'danger');
+            }
         });
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        window.resetForm = function() {
+            document.getElementById('excuseForm').reset();
+            document.getElementById('excuseForm').style.display = 'block';
+            document.getElementById('successMessage').classList.remove('show');
+            document.getElementById('selectedFile').classList.remove('show');
+            document.getElementById('submitBtn').disabled = false;
+        };
+
+        document.getElementById('absentDate').max = new Date().toISOString().split('T')[0];
     </script>
 </body>
 </html>
