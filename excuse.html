@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -340,6 +339,14 @@
             </div>
 
             <div class="form-group">
+  <label class="form-label">
+    <span class="required">*</span>عدد أيام الغياب
+  </label>
+  <input type="number" id="absentDays" class="form-control" min="1" required>
+</div>
+
+
+            <div class="form-group">
                 <label class="form-label">
                     <span class="required">*</span>
                     سبب الغياب
@@ -406,6 +413,16 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const storage = getStorage(app);
+        // قراءة رقم المدرسة من رابط الصفحة
+const urlParams = new URLSearchParams(window.location.search);
+const schoolId = urlParams.get('school');
+
+if (!schoolId) {
+  // إذا كان الرابط بدون school، نمنع الإرسال ونُظهر رسالة خطأ
+  showAlert('الرابط غير صحيح، الرجاء التواصل مع المدرسة للحصول على رابط جديد', 'danger');
+  document.getElementById('excuseForm').style.display = 'none';
+}
+
 
         document.getElementById('attachment').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -425,55 +442,62 @@
         });
 
         document.getElementById('excuseForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const form = document.getElementById('excuseForm');
-            const loading = document.getElementById('loading');
-            const successMessage = document.getElementById('successMessage');
-            const submitBtn = document.getElementById('submitBtn');
+  e.preventDefault();
 
-            try {
-                submitBtn.disabled = true;
-                form.style.display = 'none';
-                loading.style.display = 'block';
+  if (!schoolId) {
+    showAlert('الرابط غير صحيح، لا يمكن إرسال العذر', 'danger');
+    return;
+  }
 
-                const excuseData = {
-                    studentName: document.getElementById('studentName').value,
-                    grade: document.getElementById('grade').value,
-                    className: document.getElementById('className').value,
-                    absentDate: document.getElementById('absentDate').value,
-                    reason: document.getElementById('reason').value,
-                    parentPhone: document.getElementById('parentPhone').value,
-                    submittedAt: new Date().toISOString(),
-                    status: 'pending'
-                };
+  const form = document.getElementById('excuseForm');
+  const loading = document.getElementById('loading');
+  const successMessage = document.getElementById('successMessage');
+  const submitBtn = document.getElementById('submitBtn');
 
-                const fileInput = document.getElementById('attachment');
-                if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    const fileName = `excuses/${Date.now()}_${file.name}`;
-                    const fileRef = storageRef(storage, fileName);
-                    
-                    await uploadBytes(fileRef, file);
-                    const downloadURL = await getDownloadURL(fileRef);
-                    excuseData.attachmentURL = downloadURL;
-                    excuseData.attachmentName = file.name;
-                }
+  try {
+    submitBtn.disabled = true;
+    form.style.display = 'none';
+    loading.style.display = 'block';
 
-                const excusesRef = ref(database, 'excuses');
-                const newExcuseRef = push(excusesRef);
-                await set(newExcuseRef, excuseData);
+    const excuseData = {
+      schoolId, // ربط العذر بالمدرسة
+      studentName: document.getElementById('studentName').value,
+      grade: document.getElementById('grade').value,
+      className: document.getElementById('className').value,
+      absentDate: document.getElementById('absentDate').value,
+      days: parseInt(document.getElementById('absentDays').value, 10),
+      reason: document.getElementById('reason').value,
+      parentPhone: document.getElementById('parentPhone').value,
+      submittedAt: new Date().toISOString(),
+      status: 'pending'
+    };
 
-                loading.style.display = 'none';
-                successMessage.classList.add('show');
+    const fileInput = document.getElementById('attachment');
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const fileName = `excuses_${Date.now()}_${file.name}`;
+      const fileRef = storageRef(storage, fileName);
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+      excuseData.attachment = downloadURL;      // الاسم المستخدم في dashboard
+      excuseData.attachmentName = file.name;
+    }
 
-            } catch (error) {
-                loading.style.display = 'none';
-                form.style.display = 'block';
-                submitBtn.disabled = false;
-                showAlert('حدث خطأ أثناء إرسال العذر: ' + error.message, 'danger');
-            }
-        });
+    // تخزين العذر تحت مسار خاص بالمدرسة
+    const excusesRef = ref(database, `excuses/${schoolId}`);
+    const newExcuseRef = push(excusesRef);
+    await set(newExcuseRef, excuseData);
+
+    loading.style.display = 'none';
+    successMessage.classList.add('show'); // رسالة تم الإرسال بنجاح
+  } catch (error) {
+    loading.style.display = 'none';
+    form.style.display = 'block';
+    submitBtn.disabled = false;
+    showAlert(error.message, 'danger');
+  }
+});
+
 
         function showAlert(message, type) {
             const alertBox = document.getElementById('alertBox');
