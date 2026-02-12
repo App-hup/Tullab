@@ -1621,14 +1621,14 @@
         let selectedExcuse = null;
 
         // Initialize App
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-            loadData();
-            initializeDates();
-            setupNavigation();
-            updateDashboard();
-            generateExcuseLink();
-        });
+        window.addEventListener('load', async () => {
+  checkAuth();          // كما هو عندك
+  initializeDates();    // كما هو
+  setupNavigation();    // كما هو
+  await loadData();     // النسخة الجديدة
+  loadStudents();       // ليُحدَّث جدول الطلاب فورًا
+});
+
 
         // Authentication
         function checkAuth() {
@@ -1682,7 +1682,6 @@
 
 
         function saveData() {
-            localStorage.setItem('students', JSON.stringify(students));
             localStorage.setItem('lateRecords', JSON.stringify(lateRecords));
             localStorage.setItem('absentRecords', JSON.stringify(absentRecords));
             localStorage.setItem('noteRecords', JSON.stringify(noteRecords));
@@ -1783,35 +1782,51 @@
             document.getElementById('studentClass').value = '';
         }
 
-        function saveStudent() {
-            const name = document.getElementById('studentName').value.trim();
-            const civil = document.getElementById('studentCivil').value.trim();
-            const phone = document.getElementById('studentPhone').value.trim();
-            const grade = document.getElementById('studentGrade').value.trim();
-            const studentClass = document.getElementById('studentClass').value.trim();
-            
-            if (!name || !civil || !phone || !grade || !studentClass) {
-                showToast('❌ جميع الحقول مطلوبة');
-                return;
-            }
-            
-            const student = {
-                id: Date.now(),
-                name,
-                civil,
-                phone,
-                grade,
-                class: studentClass,
-                createdAt: new Date().toISOString()
-            };
-            
-            students.push(student);
-            saveData();
-            loadStudents();
-            closeModal('addStudentModal');
-            showToast('✅ تم إضافة الطالب بنجاح');
-            updateDashboard();
-        }
+        async function saveStudent() {
+  const name = document.getElementById('studentName').value.trim();
+  const civil = document.getElementById('studentCivil').value.trim();
+  const phone = document.getElementById('studentPhone').value.trim();
+  const grade = document.getElementById('studentGrade').value.trim();
+  const studentClass = document.getElementById('studentClass').value.trim();
+
+  if (!name || !civil || !phone || !grade || !studentClass) {
+    showToast('الرجاء تعبئة جميع الحقول');
+    return;
+  }
+
+  const schoolId = currentUser.schoolId;
+  const id = Date.now(); // نحافظ على نفس النمط
+
+  const student = {
+    id,
+    name,
+    civil,
+    phone,
+    grade,
+    class: studentClass,
+    schoolId,
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    await db
+      .collection('schools')
+      .doc(schoolId)
+      .collection('students')
+      .doc(String(id))
+      .set(student);
+
+    students.push(student);
+    loadStudents();
+    closeModal('addStudentModal');
+    showToast('تم حفظ الطالب بنجاح');
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حفظ الطالب');
+  }
+}
+
 
         function loadStudents() {
             const tbody = document.getElementById('studentsTableBody');
@@ -1913,67 +1928,115 @@
             });
         }
 
-        function deleteStudent(id) {
-            if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
-                students = students.filter(s => s.id !== id);
-                saveData();
-                loadStudents();
-                showToast('✅ تم حذف الطالب بنجاح');
-                updateDashboard();
-            }
-        }
+        async function deleteStudent(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا الطالب؟')) return;
 
-        function deleteAllStudents() {
-            if (confirm('⚠️ هل أنت متأكد من حذف جميع الطلاب؟ هذا الإجراء لا يمكن التراجع عنه!')) {
-                students = [];
-                saveData();
-                loadStudents();
-                showToast('✅ تم حذف جميع الطلاب');
-                updateDashboard();
-            }
-        }
+  const schoolId = currentUser.schoolId;
+
+  try {
+    await db
+      .collection('schools')
+      .doc(schoolId)
+      .collection('students')
+      .doc(String(id))
+      .delete();
+
+    students = students.filter(s => s.id !== id);
+    loadStudents();
+    showToast('تم حذف الطالب');
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حذف الطالب');
+  }
+}
+
+
+        async function deleteAllStudents() {
+  if (!confirm('سيتم حذف جميع الطلاب، هل أنت متأكد؟')) return;
+
+  const schoolId = currentUser.schoolId;
+
+  try {
+    const snap = await db
+      .collection('schools')
+      .doc(schoolId)
+      .collection('students')
+      .get();
+
+    const batch = db.batch();
+    snap.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+
+    students = [];
+    loadStudents();
+    showToast('تم حذف جميع الطلاب');
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حذف الطلاب');
+  }
+}
+
 
         // Excel Import/Export
-        function importFromExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
-                    
-                    let imported = 0;
-                    for (let i = 1; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (row.length >= 5 && row[0]) {
-                            const student = {
-                                id: Date.now() + i,
-                                name: row[0],
-                                civil: row[1] || '',
-                                phone: row[2] || '',
-                                grade: row[3] || '',
-                                class: row[4] || '',
-                                createdAt: new Date().toISOString()
-                            };
-                            students.push(student);
-                            imported++;
-                        }
-                    }
-                    
-                    saveData();
-                    loadStudents();
-                    showToast(`✅ تم استيراد ${imported} طالب بنجاح`);
-                    updateDashboard();
-                } catch (error) {
-                    showToast('❌ خطأ في قراءة الملف');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+        async function importFromExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = async function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+      const schoolId = currentUser.schoolId;
+      const batch = db.batch();
+      let imported = 0;
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length < 5) continue;
+
+        const id = Date.now() + i;
+        const student = {
+          id,
+          name: row[0],
+          civil: row[1],
+          phone: row[2],
+          grade: row[3],
+          class: row[4],
+          schoolId,
+          createdAt: new Date().toISOString()
+        };
+
+        const ref = db
+          .collection('schools')
+          .doc(schoolId)
+          .collection('students')
+          .doc(String(id));
+
+        batch.set(ref, student);
+        students.push(student);
+        imported++;
+      }
+
+      await batch.commit();
+      loadStudents();
+      showToast(`تم استيراد ${imported} طالبًا من الملف`);
+      updateDashboard();
+    } catch (error) {
+      console.error(error);
+      showToast('حدث خطأ أثناء استيراد الملف');
+    }
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
 
         function exportToExcel() {
             if (students.length === 0) {
