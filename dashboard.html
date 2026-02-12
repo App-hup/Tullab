@@ -1660,20 +1660,27 @@
 
   const schoolId = currentUser.schoolId;
 
-  // 1) الطلاب
-  const studentsSnap = await db
-    .collection('schools')
-    .doc(schoolId)
-    .collection('students')
-    .get();
+  const [
+    studentsSnap,
+    lateSnap,
+    absentSnap,
+    notesSnap,
+    permSnap
+  ] = await Promise.all([
+    db.collection('schools').doc(schoolId).collection('students').get(),
+    db.collection('schools').doc(schoolId).collection('lateRecords').get(),
+    db.collection('schools').doc(schoolId).collection('absentRecords').get(),
+    db.collection('schools').doc(schoolId).collection('notes').get(),
+    db.collection('schools').doc(schoolId).collection('permissions').get(),
+  ]);
 
-  students = studentsSnap.docs.map(doc => doc.data());
+  students = studentsSnap.docs.map(d => d.data());
+  lateRecords = lateSnap.docs.map(d => d.data());
+  absentRecords = absentSnap.docs.map(d => d.data());
+  noteRecords = notesSnap.docs.map(d => d.data());
+  permissionRecords = permSnap.docs.map(d => d.data());
 
-  // إلى أن ننقل باقي الأنواع، نتركها مرتبطة بـ localStorage مؤقتًا
-  lateRecords = JSON.parse(localStorage.getItem('lateRecords')) || [];
-  absentRecords = JSON.parse(localStorage.getItem('absentRecords')) || [];
-  noteRecords = JSON.parse(localStorage.getItem('noteRecords')) || [];
-  permissionRecords = JSON.parse(localStorage.getItem('permissionRecords')) || [];
+  // مؤقتًا: الأعذار ومستويات الغياب تبقى في localStorage
   excuseRecords = JSON.parse(localStorage.getItem('excuseRecords')) || [];
   absenceLevels = JSON.parse(localStorage.getItem('absenceLevels')) || absenceLevels;
 
@@ -1681,11 +1688,9 @@
 }
 
 
+
         function saveData() {
-            localStorage.setItem('lateRecords', JSON.stringify(lateRecords));
-            localStorage.setItem('absentRecords', JSON.stringify(absentRecords));
-            localStorage.setItem('noteRecords', JSON.stringify(noteRecords));
-            localStorage.setItem('permissionRecords', JSON.stringify(permissionRecords));
+           
             localStorage.setItem('excuseRecords', JSON.stringify(excuseRecords));
             localStorage.setItem('absenceLevels', JSON.stringify(absenceLevels));
         }
@@ -2105,34 +2110,53 @@
             document.querySelectorAll('#lateStudentsList input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
-        function saveLateRecords() {
-            const date = document.getElementById('lateDate').value;
-            const checkboxes = document.querySelectorAll('#lateStudentsList input[type="checkbox"]:checked');
-            
-            if (checkboxes.length === 0) {
-                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
-                return;
-            }
-            
-            checkboxes.forEach(cb => {
-                const studentId = parseInt(cb.value);
-                const student = students.find(s => s.id === studentId);
-                if (student) {
-                    lateRecords.push({
-                        id: Date.now() + Math.random(),
-                        studentId,
-                        studentName: student.name,
-                        date,
-                        createdAt: new Date().toISOString()
-                    });
-                }
-            });
-            
-            saveData();
-            showToast(`✅ تم حفظ تأخير ${checkboxes.length} طالب`);
-            deselectAllLate();
-            updateDashboard();
-        }
+        async function saveLateRecords() {
+  const date = document.getElementById('lateDate').value;
+  const checkboxes = document.querySelectorAll('#lateStudentsList input[type="checkbox"]:checked');
+
+  if (checkboxes.length === 0) {
+    showToast('لم يتم اختيار أي طالب');
+    return;
+  }
+
+  const schoolId = currentUser.schoolId;
+
+  try {
+    for (const cb of checkboxes) {
+      const studentId = parseInt(cb.value);
+      const student = students.find(s => s.id === studentId);
+      if (!student) continue;
+
+      const id = Date.now() + Math.random();
+
+      const record = {
+        id,
+        schoolId,
+        studentId,
+        studentName: student.name,
+        date,
+        createdAt: new Date().toISOString()
+      };
+
+      await db
+        .collection('schools')
+        .doc(schoolId)
+        .collection('lateRecords')
+        .doc(String(id))
+        .set(record);
+
+      lateRecords.push(record);
+    }
+
+    showToast(`تم تسجيل تأخر ${checkboxes.length} طالب`);
+    deselectAllLate();
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حفظ سجلات التأخر');
+  }
+}
+
 
         function sendLateWhatsApp() {
             const checkboxes = document.querySelectorAll('#lateStudentsList input[type="checkbox"]:checked');
@@ -2201,34 +2225,52 @@
             document.querySelectorAll('#absentStudentsList input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
-        function saveAbsentRecords() {
-            const date = document.getElementById('absentDate').value;
-            const checkboxes = document.querySelectorAll('#absentStudentsList input[type="checkbox"]:checked');
-            
-            if (checkboxes.length === 0) {
-                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
-                return;
-            }
-            
-            checkboxes.forEach(cb => {
-                const studentId = parseInt(cb.value);
-                const student = students.find(s => s.id === studentId);
-                if (student) {
-                    absentRecords.push({
-                        id: Date.now() + Math.random(),
-                        studentId,
-                        studentName: student.name,
-                        date,
-                        createdAt: new Date().toISOString()
-                    });
-                }
-            });
-            
-            saveData();
-            showToast(`✅ تم حفظ غياب ${checkboxes.length} طالب`);
-            deselectAllAbsent();
-            updateDashboard();
-        }
+        async function saveAbsentRecords() {
+  const date = document.getElementById('absentDate').value;
+  const checkboxes = document.querySelectorAll('#absentStudentsList input[type="checkbox"]:checked');
+
+  if (checkboxes.length === 0) {
+    showToast('لم يتم اختيار أي طالب');
+    return;
+  }
+
+  const schoolId = currentUser.schoolId;
+
+  try {
+    for (const cb of checkboxes) {
+      const studentId = parseInt(cb.value);
+      const student = students.find(s => s.id === studentId);
+      if (!student) continue;
+
+      const id = Date.now() + Math.random();
+
+      const record = {
+        id,
+        schoolId,
+        studentId,
+        studentName: student.name,
+        date,
+        createdAt: new Date().toISOString()
+      };
+
+      await db
+        .collection('schools')
+        .doc(schoolId)
+        .collection('absentRecords')
+        .doc(String(id))
+        .set(record);
+
+      absentRecords.push(record);
+    }
+
+    showToast(`تم تسجيل غياب ${checkboxes.length} طالب`);
+    deselectAllAbsent();
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حفظ سجلات الغياب');
+  }
+}
 
         function sendAbsentWhatsApp() {
             const checkboxes = document.querySelectorAll('#absentStudentsList input[type="checkbox"]:checked');
@@ -2301,35 +2343,55 @@
             document.getElementById('addPermissionModal').classList.add('active');
         }
 
-        function savePermission() {
-            const studentId = parseInt(document.getElementById('permissionStudent').value);
-            const date = document.getElementById('permissionDate').value;
-            const time = document.getElementById('permissionTime').value;
-            
-            if (!studentId || !date || !time) {
-                showToast('❌ جميع الحقول مطلوبة');
-                return;
-            }
-            
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                permissionRecords.push({
-                    id: Date.now(),
-                    studentId,
-                    studentName: student.name,
-                    grade: student.grade,
-                    class: student.class,
-                    date,
-                    time,
-                    createdAt: new Date().toISOString()
-                });
-                
-                saveData();
-                loadPermissions();
-                closeModal('addPermissionModal');
-                showToast('✅ تم حفظ الاستئذان بنجاح');
-            }
-        }
+        async function savePermission() {
+  const studentId = parseInt(document.getElementById('permissionStudent').value);
+  const date = document.getElementById('permissionDate').value;
+  const time = document.getElementById('permissionTime').value;
+
+  if (!studentId || !date || !time) {
+    showToast('الرجاء تعبئة جميع الحقول');
+    return;
+  }
+
+  const student = students.find(s => s.id === studentId);
+  if (!student) {
+    showToast('الطالب غير موجود في القائمة');
+    return;
+  }
+
+  const schoolId = currentUser.schoolId;
+  const id = Date.now();
+
+  const record = {
+    id,
+    schoolId,
+    studentId,
+    studentName: student.name,
+    grade: student.grade,
+    class: student.class,
+    date,
+    time,
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    await db
+      .collection('schools')
+      .doc(schoolId)
+      .collection('permissions')
+      .doc(String(id))
+      .set(record);
+
+    permissionRecords.push(record);
+    loadPermissions();
+    closeModal('addPermissionModal');
+    showToast('تم حفظ الاستئذان بنجاح');
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حفظ الاستئذان');
+  }
+}
+
 
         function loadPermissions() {
             const tbody = document.getElementById('permissionsTableBody');
@@ -2413,14 +2475,28 @@
             });
         }
 
-        function deletePermission(id) {
-            if (confirm('هل أنت متأكد من حذف هذا الاستئذان؟')) {
-                permissionRecords = permissionRecords.filter(r => r.id !== id);
-                saveData();
-                loadPermissions();
-                showToast('✅ تم حذف الاستئذان بنجاح');
-            }
-        }
+        async function deletePermission(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا الاستئذان؟')) return;
+
+  const schoolId = currentUser.schoolId;
+
+  try {
+    await db
+      .collection('schools')
+      .doc(schoolId)
+      .collection('permissions')
+      .doc(String(id))
+      .delete();
+
+    permissionRecords = permissionRecords.filter(r => r.id !== id);
+    loadPermissions();
+    showToast('تم حذف الاستئذان');
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حذف الاستئذان');
+  }
+}
+
 
         // Excuses
         function generateExcuseLink() {
@@ -2613,42 +2689,60 @@
             document.querySelectorAll('#noteStudentsList input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
-        function saveNotes() {
-            const date = document.getElementById('noteDate').value;
-            const text = document.getElementById('noteText').value.trim();
-            const checkboxes = document.querySelectorAll('#noteStudentsList input[type="checkbox"]:checked');
-            
-            if (!text) {
-                showToast('❌ الرجاء كتابة نص الملاحظة');
-                return;
-            }
-            
-            if (checkboxes.length === 0) {
-                showToast('❌ الرجاء تحديد طالب واحد على الأقل');
-                return;
-            }
-            
-            checkboxes.forEach(cb => {
-                const studentId = parseInt(cb.value);
-                const student = students.find(s => s.id === studentId);
-                if (student) {
-                    noteRecords.push({
-                        id: Date.now() + Math.random(),
-                        studentId,
-                        studentName: student.name,
-                        date,
-                        text,
-                        createdAt: new Date().toISOString()
-                    });
-                }
-            });
-            
-            saveData();
-            showToast(`✅ تم حفظ الملاحظات لـ ${checkboxes.length} طالب`);
-            document.getElementById('noteText').value = '';
-            deselectAllNotes();
-            updateDashboard();
-        }
+        async function saveNotes() {
+  const date = document.getElementById('noteDate').value;
+  const text = document.getElementById('noteText').value.trim();
+  const checkboxes = document.querySelectorAll('#noteStudentsList input[type="checkbox"]:checked');
+
+  if (!text) {
+    showToast('الرجاء كتابة الملاحظة');
+    return;
+  }
+  if (checkboxes.length === 0) {
+    showToast('لم يتم اختيار أي طالب');
+    return;
+  }
+
+  const schoolId = currentUser.schoolId;
+
+  try {
+    for (const cb of checkboxes) {
+      const studentId = parseInt(cb.value);
+      const student = students.find(s => s.id === studentId);
+      if (!student) continue;
+
+      const id = Date.now() + Math.random();
+
+      const record = {
+        id,
+        schoolId,
+        studentId,
+        studentName: student.name,
+        date,
+        text,
+        createdAt: new Date().toISOString()
+      };
+
+      await db
+        .collection('schools')
+        .doc(schoolId)
+        .collection('notes')
+        .doc(String(id))
+        .set(record);
+
+      noteRecords.push(record);
+    }
+
+    showToast(`تم حفظ الملاحظة لـ ${checkboxes.length} طالب`);
+    document.getElementById('noteText').value = '';
+    deselectAllNotes();
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+    showToast('حدث خطأ أثناء حفظ الملاحظات');
+  }
+}
+
 
         function sendNotesWhatsApp() {
             const text = document.getElementById('noteText').value.trim();
