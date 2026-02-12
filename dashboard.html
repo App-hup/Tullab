@@ -1652,15 +1652,34 @@
         }
 
         // Load Data
-        function loadData() {
-            students = JSON.parse(localStorage.getItem('students') || '[]');
-            lateRecords = JSON.parse(localStorage.getItem('lateRecords') || '[]');
-            absentRecords = JSON.parse(localStorage.getItem('absentRecords') || '[]');
-            noteRecords = JSON.parse(localStorage.getItem('noteRecords') || '[]');
-            permissionRecords = JSON.parse(localStorage.getItem('permissionRecords') || '[]');
-            excuseRecords = JSON.parse(localStorage.getItem('excuseRecords') || '[]');
-            absenceLevels = JSON.parse(localStorage.getItem('absenceLevels') || JSON.stringify(absenceLevels));
-        }
+        async function loadData() {
+  if (!currentUser || !currentUser.schoolId) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const schoolId = currentUser.schoolId;
+
+  // 1) الطلاب
+  const studentsSnap = await db
+    .collection('schools')
+    .doc(schoolId)
+    .collection('students')
+    .get();
+
+  students = studentsSnap.docs.map(doc => doc.data());
+
+  // إلى أن ننقل باقي الأنواع، نتركها مرتبطة بـ localStorage مؤقتًا
+  lateRecords = JSON.parse(localStorage.getItem('lateRecords')) || [];
+  absentRecords = JSON.parse(localStorage.getItem('absentRecords')) || [];
+  noteRecords = JSON.parse(localStorage.getItem('noteRecords')) || [];
+  permissionRecords = JSON.parse(localStorage.getItem('permissionRecords')) || [];
+  excuseRecords = JSON.parse(localStorage.getItem('excuseRecords')) || [];
+  absenceLevels = JSON.parse(localStorage.getItem('absenceLevels')) || absenceLevels;
+
+  updateDashboard();
+}
+
 
         function saveData() {
             localStorage.setItem('students', JSON.stringify(students));
