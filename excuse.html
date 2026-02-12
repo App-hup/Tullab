@@ -363,19 +363,25 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">
-                    إرفاق مستند (اختياري)
-                </label>
-                <div class="file-upload-wrapper">
-                    <input type="file" id="attachment" accept="image/*,.pdf">
-                    <div class="file-icon">📎</div>
-                    <div class="file-info">
-                        <strong>اضغط لاختيار ملف</strong><br>
-                        <small>الحد الأقصى: 5 ميجابايت (صورة أو PDF)</small>
-                    </div>
-                </div>
-                <div class="selected-file" id="selectedFile"></div>
-            </div>
+    <label class="form-label">
+        إرفاق مستند (اختياري)
+        <span style="color:#e67e22; font-size:13px; margin-right:8px;">
+            (جاري العمل على تفعيل المرفقات)
+        </span>
+    </label>
+
+    <div class="file-upload-wrapper" style="opacity:0.6; cursor:not-allowed;">
+        <input type="file" id="attachment" accept="image/*,.pdf" disabled>
+        <div class="file-icon">📎</div>
+        <div class="file-info">
+            <strong>ميزة إرفاق المستند غير مفعّلة حاليًا</strong><br>
+            <small>يمكنكم إرسال العذر بدون مرفقات</small>
+        </div>
+    </div>
+
+    <div class="selected-file" id="selectedFile"></div>
+</div>
+
 
             <button type="submit" class="btn-submit" id="submitBtn">
                 📤 إرسال العذر
@@ -395,10 +401,10 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 
         const firebaseConfig = {
           apiKey: "AIzaSyCyZRbnkefGENtIj7kYgcOnFUANn8reLgw",
@@ -412,7 +418,8 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const storage = getStorage(app);
+        // const storage = getStorage(app); // غير مستخدم حالياً
+
         // قراءة رقم المدرسة من رابط الصفحة
 const urlParams = new URLSearchParams(window.location.search);
 const schoolId = urlParams.get('school');
@@ -424,22 +431,22 @@ if (!schoolId) {
 }
 
 
-        document.getElementById('attachment').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const selectedFileDiv = document.getElementById('selectedFile');
+       // document.getElementById('attachment').addEventListener('change', function(e) {
+        //    const file = e.target.files[0];
+     //       const selectedFileDiv = document.getElementById('selectedFile');
             
-            if (file) {
-                const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                if (fileSize > 5) {
-                    showAlert('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت', 'danger');
-                    e.target.value = '';
-                    selectedFileDiv.classList.remove('show');
-                } else {
-                    selectedFileDiv.textContent = `✅ تم اختيار: ${file.name} (${fileSize} MB)`;
-                    selectedFileDiv.classList.add('show');
-                }
-            }
-        });
+       //     if (file) {
+       //         const fileSize = (file.size / 1024 / 1024).toFixed(2);
+         //       if (fileSize > 5) {//
+          //          showAlert('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت', 'danger');
+         //           e.target.value = '';
+          //          selectedFileDiv.classList.remove('show');
+          //      } else {//
+          //          selectedFileDiv.textContent = `✅ تم اختيار: ${file.name} (${fileSize} MB)`;
+          //          selectedFileDiv.classList.add('show');
+        //        }
+        //    }
+     //   });
 
         document.getElementById('excuseForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -472,16 +479,16 @@ if (!schoolId) {
       status: 'pending'
     };
 
-    const fileInput = document.getElementById('attachment');
-    if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const fileName = `excuses_${Date.now()}_${file.name}`;
-      const fileRef = storageRef(storage, fileName);
-      await uploadBytes(fileRef, file);
-      const downloadURL = await getDownloadURL(fileRef);
-      excuseData.attachment = downloadURL;      // الاسم المستخدم في dashboard
-      excuseData.attachmentName = file.name;
-    }
+    //const fileInput = document.getElementById('attachment');
+   // if (fileInput.files.length > 0) {
+  //    const file = fileInput.files[0];
+   //   const fileName = `excuses_${Date.now()}_${file.name}`;
+   //   const fileRef = storageRef(storage, fileName);
+   //   await uploadBytes(fileRef, file);
+   //   const downloadURL = await getDownloadURL(fileRef);
+   //   excuseData.attachment = downloadURL;      // الاسم المستخدم في dashboard
+   //   excuseData.attachmentName = file.name;
+ //   }
 
     // تخزين العذر تحت مسار خاص بالمدرسة
     const excusesRef = ref(database, `excuses/${schoolId}`);
