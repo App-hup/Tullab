@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -114,6 +113,30 @@
         showAlert('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
         return;
       }
+
+      
+  if (!role) {
+    showAlert('الرجاء اختيار نوع الحساب', 'error');
+    return;
+  }
+
+  // لو كان معلم، تأكد أن هناك مدير بنفس رقم المدرسة
+  if (role === 'teacher') {
+    try {
+      const snapshot = await db.collection('users')
+        .where('schoolId', '==', schoolId)
+        .where('role', '==', 'principal')
+        .get();
+
+      if (snapshot.empty) {
+        showAlert('رقم المدرسة غير صحيح أو لم يتم تسجيل مدير لهذه المدرسة بعد', 'error');
+        return;
+      }
+    } catch (err) {
+      showAlert('حدث خطأ أثناء التحقق من رقم المدرسة', 'error');
+      return;
+    }
+  }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'جاري الإنشاء...';
